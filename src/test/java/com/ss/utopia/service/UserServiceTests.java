@@ -1,6 +1,6 @@
 package com.ss.utopia.service;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
 //import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -81,9 +81,9 @@ class UserServiceTests {
 		user2.setUserId(2);
 		user2.setGivenName("First");
 		user2.setFamilyName("Last");
-		user2.setEmail("aa@email.com");
+		user2.setEmail("bb@email.com");
 		user2.setIsActive(true);
-		user2.setPhone("1111111111");
+		user2.setPhone("8195678900");
 		user2.setRole("admin");
 		user2.setPassword("pass");
 		users.add(user1);

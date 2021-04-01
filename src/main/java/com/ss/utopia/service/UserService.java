@@ -28,13 +28,13 @@ public class UserService {
 	}
 
 	public List<User> getUserByEmail(String email) throws EmailException {
-		checkEmailValid(email);
+		Utils.checkEmailValid(email);
 		return userDAO.findByUserEmail(email);
 
 	}
 
 	public User addUser(User user) throws EmailException {
-		checkEmailValid(user.getEmail());
+		Utils.checkEmailValid(user.getEmail());
 		user.setPassword(Utils.passwordEncoder().encode(user.getPassword()));
 		return userDAO.save(user);
 	}
@@ -42,7 +42,7 @@ public class UserService {
 	public void updateUser(User user) throws EmailException {
 		try {
 			if(user.getEmail() != null)
-				checkEmailValid(user.getEmail());
+				Utils.checkEmailValid(user.getEmail());
 			userDAO.findById(user.getUserId()).get();
 		} catch (DataAccessException e) {
 			e.printStackTrace();
@@ -59,7 +59,7 @@ public class UserService {
 		}
 	}
 
-	private void checkEmailValid(String email) throws EmailException {
+	public void checkEmailValid(String email) throws EmailException {
 		Pattern pattern = Pattern.compile("^[a-z+[0-9]]{1,}[@][a-z+[0-9]]{1,}[\\.][a-z+[0-9]]{1,}$",
 				Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(email);
