@@ -54,7 +54,7 @@ public class BookingUserController {
 		}
 	}
 	
-	@DeleteMapping("/user/{bookingId}")
+	@DeleteMapping("/bookingUser/{bookingId}")
 	public ResponseEntity<String> deleteBookingUser(@PathVariable Integer bookingId){
 		try{
 			bookingUserService.deleteByBookingId(bookingId);

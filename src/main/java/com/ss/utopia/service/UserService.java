@@ -1,8 +1,7 @@
 package com.ss.utopia.service;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -12,6 +11,7 @@ import com.ss.utopia.Utils;
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.exception.EmailException;
+import com.ss.utopia.exception.UserNotFoundException;
 
 @Service
 public class UserService {
@@ -19,17 +19,23 @@ public class UserService {
 	@Autowired
 	private UserDAO userDAO;
 
-	public User getUserById(Integer userId) {
-		return userDAO.findById(userId).get();
+	public User getUserById(Integer userId) throws UserNotFoundException {
+		return userDAO.findById(userId)
+				.orElseThrow(() -> new UserNotFoundException("User not found"));
 	}
 
 	public List<User> getAllUsers() {
 		return userDAO.findAll();
 	}
 
-	public List<User> getUserByEmail(String email) throws EmailException {
+	public User getUserByEmail(String email) throws EmailException, UserNotFoundException {
 		Utils.checkEmailValid(email);
-		return userDAO.findByUserEmail(email);
+		try {
+		return userDAO.findByUserEmail(email).get(0);
+		}
+		catch(Exception e) {
+			throw new UserNotFoundException("User not found");
+		}
 
 	}
 
@@ -39,32 +45,18 @@ public class UserService {
 		return userDAO.save(user);
 	}
 
-	public void updateUser(User user) throws EmailException {
-		try {
+	public User updateUser(User user) throws EmailException, UserNotFoundException {
 			if(user.getEmail() != null)
 				Utils.checkEmailValid(user.getEmail());
-			userDAO.findById(user.getUserId()).get();
-		} catch (DataAccessException e) {
-			e.printStackTrace();
-		}
+			userDAO.findById(user.getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));;
+			
 		user.setPassword(Utils.passwordEncoder().encode(user.getPassword()));
-		userDAO.save(user);
+		
+		return userDAO.save(user);
 	}
 
-	public void deleteUserById(Integer userId) {
-		try {
+	public void deleteUserById(Integer userId) throws UserNotFoundException {
+			userDAO.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));;
 			userDAO.deleteById(userId);
-		} catch (DataAccessException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void checkEmailValid(String email) throws EmailException {
-		Pattern pattern = Pattern.compile("^[a-z+[0-9]]{1,}[@][a-z+[0-9]]{1,}[\\.][a-z+[0-9]]{1,}$",
-				Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(email);
-		if(!matcher.find())
-			throw new EmailException("Not a valid email address format");
-
 	}
 }

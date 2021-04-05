@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.ss.utopia.entity.User;
 import com.ss.utopia.exception.EmailException;
+import com.ss.utopia.exception.UserNotFoundException;
 import com.ss.utopia.service.UserService;
 
 import org.springframework.http.HttpStatus;
@@ -36,12 +38,14 @@ public class UserController {
 	}
 
 	@GetMapping("{userId}")
-	public User getUserById(@PathVariable("userId") Integer userId) {
+	public User getUserById(@PathVariable("userId") Integer userId) throws UserNotFoundException {
+
 		return userService.getUserById(userId);
+
 	}
 
 	@GetMapping("email/{email}")
-	public List<User> getUserById(@PathVariable("email") String email) throws EmailException {
+	public User getUserById(@PathVariable("email") String email) throws EmailException, UserNotFoundException {
 
 		return userService.getUserByEmail(email);
 
@@ -49,30 +53,25 @@ public class UserController {
 
 	@PostMapping("")
 	@ResponseStatus(HttpStatus.CREATED)
-	public User createUser(@Valid @RequestBody User user) throws EmailException {
-		return userService.addUser(user);
+	public ResponseEntity<Void> createUser(@Valid @RequestBody User user, UriComponentsBuilder builder)
+			throws EmailException {
+		userService.addUser(user);
+		return ResponseEntity.created(builder.path("/utopia_airlines/user/{userId}").build(user.getUserId())).build();
 	}
 
 	@PutMapping("")
-	public ResponseEntity<String> updateUser(@RequestBody User user) throws EmailException {
-		try {
-			userService.updateUser(user);
-			return new ResponseEntity<String>(HttpStatus.OK);
-		} catch (NoSuchElementException e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>(HttpStatus.NOT_FOUND);
-		}
+	public ResponseEntity<String> updateUser(@RequestBody User user) throws EmailException, UserNotFoundException {
+		userService.updateUser(user);
+		return new ResponseEntity<String>(HttpStatus.OK);
+
 	}
 
-	@DeleteMapping("/{userId}")
-	public ResponseEntity<String> deleteUser(@PathVariable Integer userId) {
-		try {
-			userService.deleteUserById(userId);
-			return new ResponseEntity<String>(HttpStatus.NO_CONTENT);
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>(HttpStatus.NOT_FOUND);
-		}
+	@DeleteMapping("{userId}")
+	public ResponseEntity<String> deleteUser(@PathVariable Integer userId) throws UserNotFoundException {
+
+		userService.deleteUserById(userId);
+		return new ResponseEntity<String>(HttpStatus.NO_CONTENT);
+
 	}
 
 }

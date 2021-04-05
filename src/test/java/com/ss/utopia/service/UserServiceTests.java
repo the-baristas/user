@@ -1,101 +1,143 @@
 package com.ss.utopia.service;
 
-import static org.hamcrest.Matchers.hasSize;
-//import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.ss.utopia.Utils;
 import com.ss.utopia.controller.UserController;
+import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
-import com.ss.utopia.service.UserService;
+import com.ss.utopia.exception.EmailException;
+import com.ss.utopia.exception.UserNotFoundException;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(UserController.class)
+@WebMvcTest(UserService.class)
 @AutoConfigureMockMvc
 class UserServiceTests {
 
-	@Autowired
-	private MockMvc mockMvc;
-	
-	@Autowired
-	private UserController controller;
-	
-	@MockBean
+	@InjectMocks
 	private UserService userService;
-	
-	
+
+	@MockBean
+	private UserDAO dao;
+
+	@BeforeEach
+	void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
+	}
+
 	@Test
-	public void controllerLoads() throws Exception{
-		assertTrue(controller != null);
+	void testGetUserById() throws UserNotFoundException {
+		Optional<User> user = Optional.ofNullable(new User());
+		user.get().setUserId(1);
+		user.get().setGivenName("First");
+		user.get().setFamilyName("Last");
+		user.get().setEmail("aa@email.com");
+		user.get().setIsActive(true);
+		user.get().setPhone("1111111111");
+		user.get().setRole("admin");
+		user.get().setPassword("pass");
+
+		when(dao.findById(1)).thenReturn(user);
+
+		User userFromDB = userService.getUserById(1);
+
+		assertThat(userFromDB.getUserId(), is(user.get().getUserId()));
 	}
 	
-	@Test 
-	void testGetUserById() throws Exception{
-		User user = userService.getUserById(1);
+	@Test
+	void testGetUserByIdThrowsUserNotFoundException() {
+		Assertions.assertThrows(UserNotFoundException.class, () -> {
+			userService.getUserById(23);});
+	}
 
+	@Test
+	void testAddUserWithInvalidEmailException() {
+		User user = makeUser();
 
-		when(userService.getUserById(1)).thenReturn(user);
-		
-		mockMvc.perform(get("/utopia_airlines/user/1")
-		.contentType(MediaType.APPLICATION_JSON))
-		//.andExpect(jsonPath("$.phone").value(user.getPhone()) )
-		.andExpect(status().isOk());
+		user.setEmail("invalidemail.com");
+
+		assertThrows(EmailException.class, () -> {
+			userService.addUser(user);
+		});
+
+		user.setEmail("email@invalid..net");
+		assertThrows(EmailException.class, () -> {
+			userService.addUser(user);
+		});
 	}
 	
 	@Test
-	void testGetAll() throws Exception{
-		List<User> users = new ArrayList<User>();
-		User user1 = new User();
-		user1.setUserId(1);
-		user1.setGivenName("First");
-		user1.setFamilyName("Last");
-		user1.setEmail("aa@email.com");
-		user1.setIsActive(true);
-		user1.setPhone("1111111111");
-		user1.setRole("admin");
-		user1.setPassword("pass");
-		User user2 = new User();
-		user2.setUserId(2);
-		user2.setGivenName("First");
-		user2.setFamilyName("Last");
-		user2.setEmail("bb@email.com");
-		user2.setIsActive(true);
-		user2.setPhone("8195678900");
-		user2.setRole("admin");
-		user2.setPassword("pass");
-		users.add(user1);
-		users.add(user2);
+	void testUpdateUser() throws EmailException, UserNotFoundException {
+		Optional<User> user = Optional.ofNullable(new User());
+		user.get().setUserId(1);
+		user.get().setGivenName("First");
+		user.get().setFamilyName("Last");
+		user.get().setEmail("aa@email.com");
+		user.get().setIsActive(true);
+		user.get().setPhone("1111111111");
+		user.get().setRole("admin");
+		user.get().setPassword("pass");
 		
-		when(userService.getAllUsers()).thenReturn(users);
+		when(dao.findById(1)).thenReturn(user);
+		when(dao.save(user.get())).thenReturn(user.get());
 		
-		mockMvc.perform(get("/utopia_airlines/user")
-		.contentType(MediaType.APPLICATION_JSON))
-		//.andExpect(jsonPath("$.phone").value(user.getPhone()) )
-		.andExpect(status().isOk())
-		.andExpect(jsonPath("$", hasSize(2)));
+		User newUser = userService.addUser(user.get());
+		
+		user.get().setGivenName("ChangedFirstName");
+		userService.updateUser(user.get());
+		
+		assertThat(newUser.getUserId(), is(user.get().getUserId()));
+		assertThat(newUser.getGivenName(), is(user.get().getGivenName()));
+	}
+	
+	@Test
+	void testUpdateUserNoSuchElementException() {
+		User user = makeUser();
+		Assertions.assertThrows(UserNotFoundException.class, () -> {
+			userService.updateUser(user);});
+	}
+	
+	@Test
+	void testDeleteUserNoSuchElementException() {
+		Assertions.assertThrows(UserNotFoundException.class, () -> {
+			userService.deleteUserById(23);});
+	}
+	
+	private User makeUser() {
+		User user = new User();
+		user.setUserId(1);
+		user.setGivenName("First");
+		user.setFamilyName("Last");
+		user.setEmail("username@email.org");
+		user.setIsActive(true);
+		user.setPhone("1111111111");
+		user.setRole("admin");
+		user.setPassword("pass");
+		return user;
 	}
 
 }

@@ -1,7 +1,5 @@
 package com.ss.utopia;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +29,12 @@ class UtilsCheckPasswordEncoderTests {
 		String encoded1Pw2 = Utils.passwordEncoder().encode(pw2);
 		String encoded2Pw2 = Utils.passwordEncoder().encode(pw2);
 		
-		Assertions.assertFalse(false);
+		Assertions.assertFalse(Utils.passwordEncoder().matches(pw1, pw1));
+		Assertions.assertFalse(Utils.passwordEncoder().matches(pw1, pw2));
+		Assertions.assertFalse(Utils.passwordEncoder().matches(pw1, encoded1Pw2));
+		Assertions.assertFalse(Utils.passwordEncoder().matches(pw2, encoded2Pw1));
+		Assertions.assertFalse(Utils.passwordEncoder().matches(encoded1Pw1, encoded2Pw2));
+
 		
 	}
 
