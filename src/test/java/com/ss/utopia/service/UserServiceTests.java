@@ -26,8 +26,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
-import com.ss.utopia.exception.EmailException;
-import com.ss.utopia.exception.UserNotFoundException;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(UserService.class)
@@ -46,7 +44,7 @@ class UserServiceTests {
 	}
 
 	@Test
-	void testGetUserById() throws UserNotFoundException {
+	void testGetUserById() throws ResponseStatusException {
 		Optional<User> user = getUserOptional();
 
 		when(dao.findById(1)).thenReturn(user);
@@ -65,7 +63,7 @@ class UserServiceTests {
 	//Test get by email
 	
 	@Test
-	void testGetUserByEmail() throws UserNotFoundException {
+	void testGetUserByEmail() throws ResponseStatusException {
 		User user = makeUser();
 		List<User> userList = new ArrayList<User>();
 		userList.add(user);
@@ -85,7 +83,7 @@ class UserServiceTests {
 	///Test Get by username
 	
 	@Test
-	void testGetUserByUsername() throws UserNotFoundException {
+	void testGetUserByUsername() throws ResponseStatusException {
 		User user = makeUser();
 		List<User> userList = new ArrayList<User>();
 		userList.add(user);
