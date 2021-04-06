@@ -50,6 +50,11 @@ public class UserController {
 		return userService.getUserByEmail(email);
 
 	}
+	@GetMapping("username/{username}")
+	public User getUserByUsername(@PathVariable("username") String username) throws ResponseStatusException{
+		return userService.getUserByUsername(username);
+	}
+	
 
 	@PostMapping("")
 	@ResponseStatus(HttpStatus.CREATED)

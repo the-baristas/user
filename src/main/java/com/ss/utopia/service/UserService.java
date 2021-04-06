@@ -40,6 +40,17 @@ public class UserService {
 		}
 
 	}
+	
+	public User getUserByUsername(String username) {
+		try {
+		return userDAO.findByUsername(username).get(0);
+		}
+		catch(Exception e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"Could not find user with username = " + username);
+		}
+	}
+	
 
 	public User addUser(User user) throws ResponseStatusException {
 		Utils.checkEmailValid(user.getEmail());
@@ -84,4 +95,6 @@ public class UserService {
 		}
 		
 	}
+
+
 }

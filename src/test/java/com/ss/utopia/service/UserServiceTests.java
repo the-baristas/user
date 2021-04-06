@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -45,16 +47,7 @@ class UserServiceTests {
 
 	@Test
 	void testGetUserById() throws UserNotFoundException {
-		Optional<User> user = Optional.ofNullable(new User());
-		user.get().setUserId(1);
-		user.get().setGivenName("First");
-		user.get().setFamilyName("Last");
-		user.get().setUsername("someusername12");
-		user.get().setEmail("aa@email.com");
-		user.get().setIsActive(true);
-		user.get().setPhone("1111111111");
-		user.get().setRole(2);
-		user.get().setPassword("pass");
+		Optional<User> user = getUserOptional();
 
 		when(dao.findById(1)).thenReturn(user);
 
@@ -64,10 +57,52 @@ class UserServiceTests {
 	}
 	
 	@Test
-	void testGetUserByIdThrowsUserNotFoundException() {
+	void testGetUserByIdThrowsResponseStatusException() {
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.getUserById(23);});
 	}
+	
+	//Test get by email
+	
+	@Test
+	void testGetUserByEmail() throws UserNotFoundException {
+		User user = makeUser();
+		List<User> userList = new ArrayList<User>();
+		userList.add(user);
+
+		when(dao.findByUserEmail(user.getEmail())).thenReturn(userList);
+
+		User userFromDB = userService.getUserByEmail("username@email.org");
+
+		assertThat(userFromDB.getEmail(), is(user.getEmail()));
+	}
+	@Test
+	void testGetUserByEmailThrowsResponseStatusException() {
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
+			userService.getUserByEmail("doesntexist@nope.nop");});
+	}
+	
+	///Test Get by username
+	
+	@Test
+	void testGetUserByUsername() throws UserNotFoundException {
+		User user = makeUser();
+		List<User> userList = new ArrayList<User>();
+		userList.add(user);
+
+		when(dao.findByUsername(user.getUsername())).thenReturn(userList);
+
+		User userFromDB = userService.getUserByUsername("someusername23");
+
+		assertThat(userFromDB.getUsername(), is(user.getUsername()));
+	}
+	
+	@Test
+	void testGetUserByUsernameThrowsResponseStatusException() {
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
+			userService.getUserByUsername("someusername23");});
+	}
+
 
 	@Test
 	void testAddUserWithInvalidEmailException() {
@@ -86,17 +121,8 @@ class UserServiceTests {
 	}
 	
 	@Test
-	void testUpdateUser() throws EmailException, UserNotFoundException {
-		Optional<User> user = Optional.ofNullable(new User());
-		user.get().setUserId(1);
-		user.get().setGivenName("First");
-		user.get().setFamilyName("Last");
-		user.get().setUsername("someusername12");
-		user.get().setEmail("aa@email.com");
-		user.get().setIsActive(true);
-		user.get().setPhone("1111111111");
-		user.get().setRole(2);
-		user.get().setPassword("pass");
+	void testUpdateUser() throws ResponseStatusException {
+		Optional<User> user = getUserOptional();
 		
 		when(dao.findById(1)).thenReturn(user);
 		when(dao.save(user.get())).thenReturn(user.get());
@@ -128,12 +154,27 @@ class UserServiceTests {
 		user.setUserId(1);
 		user.setGivenName("First");
 		user.setFamilyName("Last");
-		user.setUsername("someUsername23");
+		user.setUsername("someusername23");
 		user.setEmail("username@email.org");
 		user.setIsActive(true);
 		user.setPhone("1111111111");
 		user.setRole(2);
 		user.setPassword("pass");
+		return user;
+	}
+	
+	private Optional<User> getUserOptional(){
+		Optional<User> user = Optional.ofNullable(new User());
+		user.get().setUserId(1);
+		user.get().setGivenName("First");
+		user.get().setFamilyName("Last");
+		user.get().setUsername("someusername23");
+		user.get().setEmail("username@email.org");
+		user.get().setIsActive(true);
+		user.get().setPhone("1111111111");
+		user.get().setRole(2);
+		user.get().setPassword("pass");
+		
 		return user;
 	}
 
