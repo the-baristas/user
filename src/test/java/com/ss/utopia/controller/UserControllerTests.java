@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 //import org.springframework.test.web.servlet.RequestBuilder;
 //import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ss.utopia.entity.User;
@@ -88,7 +90,8 @@ class UserControllerTests {
 
 	@Test
 	void testUserGetByIdThrowsUserNotFoundException() throws Exception {
-		when(userService.getUserById(99)).thenThrow(new UserNotFoundException("User not found"));
+		when(userService.getUserById(99)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
+				"Could not find user with id = " + 99));
 
 		mockMvc.perform(get("/utopia_airlines/user/99")).andExpect(status().isNotFound());
 	}
@@ -150,15 +153,15 @@ class UserControllerTests {
 		doNothing().when(userService).deleteUserById(user.getUserId());
 		mockMvc.perform(delete("/utopia_airlines/user/{userId}", user.getUserId())).andExpect(status().isNoContent());
 
-		// verify(userService, times(1)).getUserById(user.getUserId());
 		verify(userService, times(1)).deleteUserById(user.getUserId());
 		verifyNoMoreInteractions(userService);
 	}
-
+	
 	@Test
 	void testDeleteUserhrowsUserNotFoundException() throws Exception {
 
-		doThrow(new UserNotFoundException("User not found")).when(userService).deleteUserById(99);
+		doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
+				"Could not find user with id = " + 99)).when(userService).deleteUserById(99);
 		mockMvc.perform(delete("/utopia_airlines/user/99")).andExpect(status().isNotFound());
 	}
 

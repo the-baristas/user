@@ -20,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
@@ -64,7 +65,7 @@ class UserServiceTests {
 	
 	@Test
 	void testGetUserByIdThrowsUserNotFoundException() {
-		Assertions.assertThrows(UserNotFoundException.class, () -> {
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.getUserById(23);});
 	}
 
@@ -74,12 +75,12 @@ class UserServiceTests {
 
 		user.setEmail("invalidemail.com");
 
-		assertThrows(EmailException.class, () -> {
+		assertThrows(ResponseStatusException.class, () -> {
 			userService.addUser(user);
 		});
 
 		user.setEmail("email@invalid..net");
-		assertThrows(EmailException.class, () -> {
+		assertThrows(ResponseStatusException.class, () -> {
 			userService.addUser(user);
 		});
 	}
@@ -112,13 +113,13 @@ class UserServiceTests {
 	@Test
 	void testUpdateUserNoSuchElementException() {
 		User user = makeUser();
-		Assertions.assertThrows(UserNotFoundException.class, () -> {
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.updateUser(user);});
 	}
 	
 	@Test
 	void testDeleteUserNoSuchElementException() {
-		Assertions.assertThrows(UserNotFoundException.class, () -> {
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.deleteUserById(23);});
 	}
 	
