@@ -35,12 +35,13 @@ class UserDAOTests {
 		//user.setUserId(1);
 		user.setGivenName("First");
 		user.setFamilyName("Last");
-		user.setEmail("aa@email.com");
+		user.setUsername("someUsername23");
+		user.setEmail("username@email.org");
 		user.setIsActive(true);
 		user.setPhone("1111111111");
-		user.setRole("admin");
+		user.setRole(2);
 		user.setPassword("pass");
-		
+
 		entityManager.persist(user);
 		entityManager.flush();
 		
@@ -54,10 +55,11 @@ class UserDAOTests {
 		//user.setUserId(1);
 		user.setGivenName("First");
 		user.setFamilyName("Last");
-		user.setEmail("email@gmail.com");
+		user.setUsername("someUsername23");
+		user.setEmail("username@email.org");
 		user.setIsActive(true);
-		user.setPhone("2111111111");
-		user.setRole("admin");
+		user.setPhone("1111111111");
+		user.setRole(2);
 		user.setPassword("pass");
 		
 		entityManager.persist(user);

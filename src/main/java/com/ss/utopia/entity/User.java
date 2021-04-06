@@ -21,6 +21,9 @@ public class User {
 	@Column(name = "family_name")
 	private String familyName;
 	
+	@Column(name = "username")
+	private String username;
+	
 	@Column(name = "email")
 	private String email;
 	
@@ -31,7 +34,7 @@ public class User {
 	private String phone;
 	
 	@Column(name = "role")
-	private String role;
+	private int role;
 	
 	@Column(name = "is_active")
 	private boolean isActive;
@@ -86,11 +89,19 @@ public class User {
 		this.phone = phone;
 	}
 
-	public String getRole() {
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public int getRole() {
 		return role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(int role) {
 		this.role = role;
 	}
 

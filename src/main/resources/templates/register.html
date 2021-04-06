@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+<title>Account Registration</title>
+</head>
+<body>
+	<h2>Register</h2>
+	<form action="#" th:action="@{/utopia_airlines/user}" th:object="${user}" method="post">
+		<table>
+			<tr>
+				<td>First Name</td>
+				<td><input type="text" th:field="*{givenName}" placeholder="First Name"></td>
+			</tr>
+			<tr>
+				<td>Last Name</td>
+				<td><input type="text" th:field="*{familyName}" placeholder="Last Name"></td>
+			</tr>
+
+			<tr>
+				<td>Phone Number</td>
+				<td><input type="text" th:field="*{phone}" placeholder="Phone Number"></td>
+			</tr>
+			<tr>
+				<td>E-mail</td>
+				<td><input type="text" th:field="*{email}" placeholder="E-mail"></td>
+			</tr>
+			<tr>
+				<td>Password</td>
+				<td><input type="password" th:field="*{password}" placeholder="Password"></td>
+			</tr>
+			<tr>
+				<td>
+					
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type="submit" name="submit" value="Register">
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>

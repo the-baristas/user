@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -13,21 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 
-import com.ss.utopia.Utils;
-import com.ss.utopia.controller.UserController;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.exception.EmailException;
@@ -55,10 +48,11 @@ class UserServiceTests {
 		user.get().setUserId(1);
 		user.get().setGivenName("First");
 		user.get().setFamilyName("Last");
+		user.get().setUsername("someusername12");
 		user.get().setEmail("aa@email.com");
 		user.get().setIsActive(true);
 		user.get().setPhone("1111111111");
-		user.get().setRole("admin");
+		user.get().setRole(2);
 		user.get().setPassword("pass");
 
 		when(dao.findById(1)).thenReturn(user);
@@ -96,10 +90,11 @@ class UserServiceTests {
 		user.get().setUserId(1);
 		user.get().setGivenName("First");
 		user.get().setFamilyName("Last");
+		user.get().setUsername("someusername12");
 		user.get().setEmail("aa@email.com");
 		user.get().setIsActive(true);
 		user.get().setPhone("1111111111");
-		user.get().setRole("admin");
+		user.get().setRole(2);
 		user.get().setPassword("pass");
 		
 		when(dao.findById(1)).thenReturn(user);
@@ -132,10 +127,11 @@ class UserServiceTests {
 		user.setUserId(1);
 		user.setGivenName("First");
 		user.setFamilyName("Last");
+		user.setUsername("someUsername23");
 		user.setEmail("username@email.org");
 		user.setIsActive(true);
 		user.setPhone("1111111111");
-		user.setRole("admin");
+		user.setRole(2);
 		user.setPassword("pass");
 		return user;
 	}

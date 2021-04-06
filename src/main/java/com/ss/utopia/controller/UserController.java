@@ -1,13 +1,16 @@
 package com.ss.utopia.controller;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,8 +25,7 @@ import com.ss.utopia.exception.EmailException;
 import com.ss.utopia.exception.UserNotFoundException;
 import com.ss.utopia.service.UserService;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import net.bytebuddy.matcher.ModifierMatcher.Mode;
 
 @RestController
 @RequestMapping("/utopia_airlines/user")
@@ -58,6 +60,19 @@ public class UserController {
 		userService.addUser(user);
 		return ResponseEntity.created(builder.path("/utopia_airlines/user/{userId}").build(user.getUserId())).build();
 	}
+	
+//	@PostMapping("")
+//	@ResponseStatus(HttpStatus.CREATED)
+//	public String createUser(@ModelAttribute User user, Model model, UriComponentsBuilder builder)
+//			throws EmailException {
+//		model.addAttribute("phone", user);
+//		model.addAttribute("email", user);
+//		System.out.println(user.getEmail());
+//		// userService.addUser(user);
+////		return ResponseEntity.created(builder.path("/utopia_airlines/user/{userId}").build(user.getUserId())).build();
+//		return "result";
+//	}
+	
 
 	@PutMapping("")
 	public ResponseEntity<String> updateUser(@RequestBody User user) throws EmailException, UserNotFoundException {
