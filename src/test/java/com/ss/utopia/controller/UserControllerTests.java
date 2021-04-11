@@ -56,12 +56,11 @@ class UserControllerTests {
 
 		when(userService.getUserById(1)).thenReturn(user);
 
-		mockMvc.perform(get("/utopia_airlines/user/1").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/users/1").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.userId").value(user.getUserId()))
 				.andExpect(jsonPath("$.givenName").value(user.getGivenName()))
 				.andExpect(jsonPath("$.familyName").value(user.getFamilyName()))
 				.andExpect(jsonPath("$.email").value(user.getEmail()))
-				.andExpect(jsonPath("$.password").value(user.getPassword()))
 				.andExpect(jsonPath("$.role").value(user.getRole()))
 				.andExpect(jsonPath("$.isActive").value(user.getIsActive()))
 				.andExpect(jsonPath("$.phone").value(user.getPhone())).andExpect(status().isOk());
@@ -73,12 +72,11 @@ class UserControllerTests {
 
 		when(userService.getUserByEmail("username@email.org")).thenReturn(user);
 
-		mockMvc.perform(get("/utopia_airlines/user/email/username@email.org").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/users/email/username@email.org").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.userId").value(user.getUserId()))
 				.andExpect(jsonPath("$.givenName").value(user.getGivenName()))
 				.andExpect(jsonPath("$.familyName").value(user.getFamilyName()))
 				.andExpect(jsonPath("$.email").value(user.getEmail()))
-				.andExpect(jsonPath("$.password").value(user.getPassword()))
 				.andExpect(jsonPath("$.role").value(user.getRole()))
 				.andExpect(jsonPath("$.isActive").value(user.getIsActive()))
 				.andExpect(jsonPath("$.phone").value(user.getPhone())).andExpect(status().isOk());
@@ -89,7 +87,7 @@ class UserControllerTests {
 		when(userService.getUserById(99)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
 				"Could not find user with id = " + 99));
 
-		mockMvc.perform(get("/utopia_airlines/user/99")).andExpect(status().isNotFound());
+		mockMvc.perform(get("/users/99")).andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -105,8 +103,7 @@ class UserControllerTests {
 
 		when(userService.getAllUsers()).thenReturn(users);
 
-		mockMvc.perform(get("/utopia_airlines/user").contentType(MediaType.APPLICATION_JSON))
-				// .andExpect(jsonPath("$.phone").value(user.getPhone()) )
+		mockMvc.perform(get("/users").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 	}
 
@@ -116,7 +113,7 @@ class UserControllerTests {
 
 		when(userService.addUser(user)).thenReturn(user);
 
-		mockMvc.perform(post("/utopia_airlines/user").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(user)))
 				.andExpect(MockMvcResultMatchers.status().isCreated())
 				.andExpect(MockMvcResultMatchers.header().exists("Location"))
@@ -131,13 +128,10 @@ class UserControllerTests {
 
 		when(userService.getUserById(user.getUserId())).thenReturn(user);
 
-		when(userService.updateUser(user)).thenReturn(user);
-		mockMvc.perform(put("/utopia_airlines/user", user).contentType(MediaType.APPLICATION_JSON)
+		when(userService.updateUser(user.getUserId(), user)).thenReturn(user);
+		mockMvc.perform(put("/users/{userId}", user.getUserId(), user).contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(user))).andExpect(status().isOk());
 
-		// verify(userService, times(1)).getUserById(user.getUserId());
-		// verify(userService, times(1)).updateUser(user);
-		// verifyNoMoreInteractions(userService);
 	}
 
 	@Test
@@ -147,7 +141,7 @@ class UserControllerTests {
 		when(userService.getUserById(user.getUserId())).thenReturn(user);
 
 		doNothing().when(userService).deleteUserById(user.getUserId());
-		mockMvc.perform(delete("/utopia_airlines/user/{userId}", user.getUserId())).andExpect(status().isNoContent());
+		mockMvc.perform(delete("/users/{userId}", user.getUserId())).andExpect(status().isNoContent());
 
 		verify(userService, times(1)).deleteUserById(user.getUserId());
 		verifyNoMoreInteractions(userService);
@@ -158,7 +152,7 @@ class UserControllerTests {
 
 		doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
 				"Could not find user with id = " + 99)).when(userService).deleteUserById(99);
-		mockMvc.perform(delete("/utopia_airlines/user/99")).andExpect(status().isNotFound());
+		mockMvc.perform(delete("/users/99")).andExpect(status().isNotFound());
 	}
 
 	private User makeUser() {

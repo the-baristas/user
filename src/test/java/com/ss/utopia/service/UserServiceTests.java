@@ -128,21 +128,21 @@ class UserServiceTests {
 		User newUser = userService.addUser(user.get());
 		
 		user.get().setGivenName("ChangedFirstName");
-		userService.updateUser(user.get());
+		userService.updateUser(1, user.get());
 		
 		assertThat(newUser.getUserId(), is(user.get().getUserId()));
 		assertThat(newUser.getGivenName(), is(user.get().getGivenName()));
 	}
 	
 	@Test
-	void testUpdateUserNoSuchElementException() {
+	void testUpdateResponseStatusExceptionException() {
 		User user = makeUser();
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
-			userService.updateUser(user);});
+			userService.updateUser(1, user);});
 	}
 	
 	@Test
-	void testDeleteUserNoSuchElementException() {
+	void testDeleteResponseStatusExceptionException() {
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.deleteUserById(23);});
 	}

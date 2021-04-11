@@ -7,6 +7,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
 @Entity
 @Table(name = "user")
 public class User {
@@ -28,6 +32,7 @@ public class User {
 	private String email;
 	
 	@Column(name = "password")
+	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
 	
 	@Column(name = "phone")
@@ -72,12 +77,10 @@ public class User {
 	}
 
 	public String getPassword() {
-		//decryption should happen here
 		return password;
 	}
 
 	public void setPassword(String password) {
-		//encryption should happen
 		this.password = password;
 	}
 
@@ -115,8 +118,9 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [userId=" + userId + ", givenName=" + givenName + ", familyName=" + familyName + ", email=" + email
-				+ ", password=" + password + ", phone=" + phone + ", role=" + role + ", isActive=" + isActive + "]";
+		return "User [userId=" + userId + ", givenName=" + givenName + ", familyName=" + familyName + ", username="
+				+ username + ", email=" + email + ", password=" + password + ", phone=" + phone + ", role=" + role
+				+ ", isActive=" + isActive + "]";
 	}
 
 	@Override

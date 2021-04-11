@@ -12,7 +12,6 @@ import com.ss.utopia.Utils;
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
 
-
 @Service
 public class UserService {
 
@@ -20,9 +19,8 @@ public class UserService {
 	private UserDAO userDAO;
 
 	public User getUserById(Integer userId) throws ResponseStatusException {
-		return userDAO.findById(userId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-						"Could not find user with id = " + userId));
+		return userDAO.findById(userId).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 	}
 
 	public List<User> getAllUsers() {
@@ -32,69 +30,87 @@ public class UserService {
 	public User getUserByEmail(String email) throws ResponseStatusException {
 		Utils.checkEmailValid(email);
 		try {
-		return userDAO.findByUserEmail(email).get(0);
-		}
-		catch(Exception e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"Could not find user with email = " + email);
+			return userDAO.findByUserEmail(email).get(0);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with email = " + email);
 		}
 
 	}
-	
+
 	public User getUserByUsername(String username) {
 		try {
-		return userDAO.findByUsername(username).get(0);
-		}
-		catch(Exception e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"Could not find user with username = " + username);
+			return userDAO.findByUsername(username).get(0);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with username = " + username);
 		}
 	}
-	
 
 	public User addUser(User user) throws ResponseStatusException {
+		checkUserFieldsFilled(user);
+		
 		Utils.checkEmailValid(user.getEmail());
+		Utils.checkPhoneNumberValid(user.getPhone());
+		
 		user.setPassword(Utils.passwordEncoder().encode(user.getPassword()));
-		
+
 		checkNoDuplicateFields(user);
-		
+
 		return userDAO.save(user);
 	}
 
-	public User updateUser(User user) throws ResponseStatusException {
-			if(user.getEmail() != null)
-				Utils.checkEmailValid(user.getEmail());
-			userDAO.findById(user.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"Could not find user with id = " + user.getUserId()));
-			
-		user.setPassword(Utils.passwordEncoder().encode(user.getPassword()));
-		
-		return userDAO.save(user);
+	public User updateUser(int userId, User newUserInfo) throws ResponseStatusException {
+		if (newUserInfo.getEmail() != null)
+			Utils.checkEmailValid(newUserInfo.getEmail());
+		userDAO.findById(userId).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
+
+		newUserInfo.setPassword(Utils.passwordEncoder().encode(newUserInfo.getPassword()));
+		newUserInfo.setUserId(userId);
+		return userDAO.save(newUserInfo);
 	}
 
 	public void deleteUserById(Integer userId) throws ResponseStatusException {
-			userDAO.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"Could not find user with id = " + userId));;
-			userDAO.deleteById(userId);
+		userDAO.findById(userId).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
+		;
+		userDAO.deleteById(userId);
 	}
-	
+
 	private void checkNoDuplicateFields(User newUser) throws ResponseStatusException {
 		List<User> users = userDAO.findAll();
-		for(User user : users) {
-			if(user.getEmail().equals(newUser.getEmail()))
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-						"A user with this email already exists");
-			
-			if(user.getUsername().equals(newUser.getUsername()))
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-						"A user with this username already exists");
-			
-			if(user.getPhone().equals(newUser.getPhone()))
+		for (User user : users) {
+			if (user.getEmail().equals(newUser.getEmail()))
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A user with this email already exists");
+
+			if (user.getUsername().equals(newUser.getUsername()))
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A user with this username already exists");
+
+			if (user.getPhone().equals(newUser.getPhone()))
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 						"A user with this phone number already exists");
 		}
-		
-	}
 
+	}
+	
+	private void checkUserFieldsFilled(User user) {
+		if(user.getGivenName() == null || user.getGivenName().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Must include a first name.");
+		if(user.getFamilyName() == null || user.getFamilyName().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Must include a last name.");
+		if(user.getEmail() == null || user.getEmail().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Must include an email.");
+		if(user.getUsername() == null || user.getUsername().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Must include a username.");
+		if(user.getPassword() == null || user.getPassword().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Must include a password.");
+		if(user.getPhone() == null || user.getPhone().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Must include a phone number.");
+	}
 
 }

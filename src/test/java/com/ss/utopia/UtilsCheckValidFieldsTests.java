@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
-class UtilsCheckValidEmailTests {
+class UtilsCheckValidFieldsTests {
 	
 	@Test
 	void testEmailValidThrowsException() {
@@ -27,6 +27,20 @@ class UtilsCheckValidEmailTests {
 		assertDoesNotThrow(() -> {Utils.checkEmailValid("anthony2345@yahoo.com");});
 		assertDoesNotThrow(() -> {Utils.checkEmailValid("df5@website.gov");});
 		assertDoesNotThrow(() -> {Utils.checkEmailValid("validemail@site.ca");});
+	}
+	
+	@Test
+	void testPhoneNumberValidThrowsException() {
+		assertThrows( ResponseStatusException.class, () -> {Utils.checkPhoneNumberValid("7");} );
+		assertThrows( ResponseStatusException.class, () -> {Utils.checkPhoneNumberValid("99945677");} );
+		assertThrows( ResponseStatusException.class, () -> {Utils.checkPhoneNumberValid("888 888 8888");} );
+		assertThrows( ResponseStatusException.class, () -> {Utils.checkPhoneNumberValid("777-555-4848");} );
+		
+	}
+	
+	@Test
+	void testPhoneNumberValidDoesNotThrowException() {
+		assertDoesNotThrow(() -> {Utils.checkPhoneNumberValid("2825556756");});
 	}
 	
 }

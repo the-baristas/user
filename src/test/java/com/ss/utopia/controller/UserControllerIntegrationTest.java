@@ -24,15 +24,15 @@ class UserControllerIntegrationTest {
 		User user = makeUser();
 		userDao.save(user);
 		
-		webClient.get().uri("/utopia_airlines/user/{userId}", user.getUserId())
+		webClient.get().uri("/users/{userId}", user.getUserId())
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange().expectStatus().isOk()
 			.expectBody(User.class).isEqualTo(user);
 	}
 	
 	@Test
-	public void testFindUserByUserNotFound() {
-		webClient.get().uri("/utopia_airlines/user/{userId}", 999)
+	public void testFindUserByIdUserNotFound() {
+		webClient.get().uri("/users/{userId}", 999)
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isNotFound();
 	}
@@ -42,7 +42,7 @@ class UserControllerIntegrationTest {
 		User user = makeUser();
 		userDao.save(user);
 		
-		webClient.get().uri("/utopia_airlines/user/email/{email}", user.getEmail())
+		webClient.get().uri("/users/email/{email}", user.getEmail())
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange().expectStatus().isOk()
 			.expectBody(User.class).isEqualTo(user);
@@ -50,7 +50,7 @@ class UserControllerIntegrationTest {
 	
 	@Test
 	public void testFindEmailByUserNotFound() {
-		webClient.get().uri("/utopia_airlines/user/email/{email}", "doesnotexist@gmail.com")
+		webClient.get().uri("/users/email/{email}", "doesnotexist@gmail.com")
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isNotFound();
 	}
@@ -60,7 +60,7 @@ class UserControllerIntegrationTest {
 		User user = makeUser();
 		userDao.save(user);
 		
-		webClient.get().uri("/utopia_airlines/user/email/{email}", user.getEmail())
+		webClient.get().uri("/users/email/{email}", user.getEmail())
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange().expectStatus().isOk()
 			.expectBody(User.class).isEqualTo(user);
@@ -68,7 +68,7 @@ class UserControllerIntegrationTest {
 	
 	@Test
 	public void testFindUsernameByUserNotFound() {
-		webClient.get().uri("/utopia_airlines/user/username/{username}", "absolutelynot9001")
+		webClient.get().uri("/users/username/{username}", "absolutelynot9001")
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isNotFound();
 	}
@@ -78,7 +78,7 @@ class UserControllerIntegrationTest {
 		User user = makeUser();
 		userDao.save(user);
 		
-		webClient.get().uri("/utopia_airlines/user/{userId}", user.getUserId())
+		webClient.get().uri("/users/{userId}", user.getUserId())
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isOk()
 		.expectBody(User.class).isEqualTo(user);
@@ -86,7 +86,7 @@ class UserControllerIntegrationTest {
 		user.setGivenName("New");
 		userDao.save(user);
 		
-		webClient.get().uri("/utopia_airlines/user/{userId}", user.getUserId())
+		webClient.get().uri("/users/{userId}", user.getUserId())
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isOk()
 		.expectBody(User.class).isEqualTo(user);

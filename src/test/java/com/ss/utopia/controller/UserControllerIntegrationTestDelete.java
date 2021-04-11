@@ -26,21 +26,21 @@ class UserControllerIntegrationTestDelete {
 		User user = makeUser();
 		userDao.save(user);
 		
-		webClient.get().uri("/utopia_airlines/user/{userId}", user.getUserId())
+		webClient.get().uri("/users/{userId}", user.getUserId())
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isOk()
 		.expectBody(User.class).isEqualTo(user);
 		
 		//userDao.delete(user);
 		
-		webClient.delete().uri("/utopia_airlines/user/{userId}", user.getUserId())
+		webClient.delete().uri("/users/{userId}", user.getUserId())
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isNoContent();
 	}
 	
 	@Test
 	public void testDeleteUserNotFound() {
-		webClient.delete().uri("/utopia_airlines/user/{userId}", 9001)
+		webClient.delete().uri("/users/{userId}", 9001)
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isNotFound();
 	}
