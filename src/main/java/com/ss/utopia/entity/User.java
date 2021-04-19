@@ -6,13 +6,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "user")
+@Getter
+@Setter
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,17 +30,18 @@ public class User {
 	@Column(name = "family_name")
 	private String familyName;
 	
-	@Column(name = "username")
+	@Column(name = "username", unique = true)
 	private String username;
 	
-	@Column(name = "email")
+	@Email
+	@Column(name = "email", unique = true)
 	private String email;
 	
 	@Column(name = "password")
 	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
 	
-	@Column(name = "phone")
+	@Column(name = "phone", unique = true)
 	private String phone;
 	
 	@Column(name = "role")
@@ -108,11 +114,11 @@ public class User {
 		this.role = role;
 	}
 
-	public boolean getIsActive() {
+	public boolean isActive() {
 		return isActive;
 	}
 
-	public void setIsActive(boolean isActive) {
+	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
 

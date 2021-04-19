@@ -52,7 +52,7 @@ class UserControllerIntegrationTestDelete {
 		user.setFamilyName("Last");
 		user.setUsername("someUsername23");
 		user.setEmail("username@email.org");
-		user.setIsActive(true);
+		user.setActive(true);
 		user.setPhone("1111111111");
 		user.setRole(2);
 		user.setPassword("pass");

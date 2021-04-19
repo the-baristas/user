@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.ss.utopia.Utils;
 import com.ss.utopia.entity.User;
 
 public class UtopiaUserDetails implements UserDetails {
@@ -26,8 +27,7 @@ public class UtopiaUserDetails implements UserDetails {
 	public UtopiaUserDetails(User user) {
 		this.username = user.getUsername();
 		this.password = user.getPassword();
-		this.isActive = user.getIsActive();
-		//this.authorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+		this.isActive = user.isActive();
 	}
 
 	public UtopiaUserDetails() {
@@ -42,8 +42,8 @@ public class UtopiaUserDetails implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		System.out.println(this.password);
-		return this.password;
+		return password;
+		//return Utils.passwordEncoder().encode(password);
 	}
 
 	@Override

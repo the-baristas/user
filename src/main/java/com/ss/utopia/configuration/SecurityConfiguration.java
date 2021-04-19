@@ -22,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.ss.utopia.Utils;
 import com.ss.utopia.login.UtopiaUserDetailsService;
-import com.ss.utopia.login.jwt.JwtConfiguration;
 import com.ss.utopia.login.jwt.JwtTokenVerifier;
 import com.ss.utopia.login.jwt.JwtUserAuthenticationFilter;
 
@@ -42,7 +41,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception{
-		http
+		http.cors().and()
 		.csrf().disable()
 		.sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -61,4 +60,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		//return NoOpPasswordEncoder.getInstance();
 		return new BCryptPasswordEncoder();
 	}
+	
+
 }

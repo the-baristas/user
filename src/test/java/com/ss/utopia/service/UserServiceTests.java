@@ -154,7 +154,7 @@ class UserServiceTests {
 		user.setFamilyName("Last");
 		user.setUsername("someusername23");
 		user.setEmail("username@email.org");
-		user.setIsActive(true);
+		user.setActive(true);
 		user.setPhone("1111111111");
 		user.setRole(2);
 		user.setPassword("pass");
@@ -168,7 +168,7 @@ class UserServiceTests {
 		user.get().setFamilyName("Last");
 		user.get().setUsername("someusername23");
 		user.get().setEmail("username@email.org");
-		user.get().setIsActive(true);
+		user.get().setActive(true);
 		user.get().setPhone("1111111111");
 		user.get().setRole(2);
 		user.get().setPassword("pass");

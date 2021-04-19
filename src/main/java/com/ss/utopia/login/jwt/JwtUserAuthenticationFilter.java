@@ -35,6 +35,7 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
+		
 		try {
 			UserAuthenticationRequest authenticationRequest = new ObjectMapper().readValue(request.getInputStream(),
 					UserAuthenticationRequest.class);
@@ -44,10 +45,12 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 					authenticationRequest.getPassword() // credentials
 			);
 
+
 			return authenticationManager.authenticate(authentication);
 
-		} catch (IOException e) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid or expired token.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials.");
 		}
 	}
 
@@ -55,14 +58,16 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		
-		
 		String token = Jwts.builder().setSubject(authResult.getName())
 			.claim("authorities", authResult.getAuthorities())
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
 			.signWith(JwtUtils.getSecretKey())
 			.compact();
+
 		response.addHeader(JwtUtils.getAuthorizationHeader(), JwtUtils.getTokenPrefix() + token);
+		response.setContentType("application/json");
+	    response.setCharacterEncoding("UTF-8");
 	}
 	
 	

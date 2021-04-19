@@ -23,7 +23,7 @@ public class UtopiaUserDetailsService implements UserDetailsService {
 		
 		if(users.size() == 0)
 			throw new UsernameNotFoundException("Username does not exist: " + username);
-		System.out.println(users.get(0));
+
 		return new UtopiaUserDetails(users.get(0));
 	}
 

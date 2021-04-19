@@ -47,10 +47,10 @@ public class UserService {
 
 	public User addUser(User user) throws ResponseStatusException {
 		checkUserFieldsFilled(user);
-		
+
 		Utils.checkEmailValid(user.getEmail());
 		Utils.checkPhoneNumberValid(user.getPhone());
-		
+
 		user.setPassword(Utils.passwordEncoder().encode(user.getPassword()));
 
 		checkNoDuplicateFields(user);
@@ -59,13 +59,18 @@ public class UserService {
 	}
 
 	public User updateUser(int userId, User newUserInfo) throws ResponseStatusException {
-		if (newUserInfo.getEmail() != null)
-			Utils.checkEmailValid(newUserInfo.getEmail());
-		userDAO.findById(userId).orElseThrow(
+		User oldUserInfo = userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 
-		newUserInfo.setPassword(Utils.passwordEncoder().encode(newUserInfo.getPassword()));
+		if (newUserInfo.getEmail() != null)
+			Utils.checkEmailValid(newUserInfo.getEmail());
+		if (newUserInfo.getPassword() != null)
+			newUserInfo.setPassword(Utils.passwordEncoder().encode(newUserInfo.getPassword()));
+
+		else
+			newUserInfo.setPassword(oldUserInfo.getPassword());
 		newUserInfo.setUserId(userId);
+		checkNoDuplicateFields(newUserInfo);
 		return userDAO.save(newUserInfo);
 	}
 
@@ -79,38 +84,33 @@ public class UserService {
 	private void checkNoDuplicateFields(User newUser) throws ResponseStatusException {
 		List<User> users = userDAO.findAll();
 		for (User user : users) {
+			if (user.equals(newUser))
+				continue;
 			if (user.getEmail().equals(newUser.getEmail()))
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A user with this email already exists");
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this email already exists");
 
 			if (user.getUsername().equals(newUser.getUsername()))
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A user with this username already exists");
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this username already exists");
 
 			if (user.getPhone().equals(newUser.getPhone()))
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-						"A user with this phone number already exists");
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this phone number already exists");
 		}
 
 	}
-	
+
 	private void checkUserFieldsFilled(User user) {
-		if(user.getGivenName() == null || user.getGivenName().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Must include a first name.");
-		if(user.getFamilyName() == null || user.getFamilyName().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Must include a last name.");
-		if(user.getEmail() == null || user.getEmail().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Must include an email.");
-		if(user.getUsername() == null || user.getUsername().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Must include a username.");
-		if(user.getPassword() == null || user.getPassword().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Must include a password.");
-		if(user.getPhone() == null || user.getPhone().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"Must include a phone number.");
+		if (user.getGivenName() == null || user.getGivenName().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a first name.");
+		if (user.getFamilyName() == null || user.getFamilyName().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a last name.");
+		if (user.getEmail() == null || user.getEmail().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include an email.");
+		if (user.getUsername() == null || user.getUsername().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a username.");
+		if (user.getPassword() == null || user.getPassword().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a password.");
+		if (user.getPhone() == null || user.getPhone().equals(""))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a phone number.");
 	}
 
 }
