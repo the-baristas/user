@@ -7,15 +7,13 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
-import com.ss.utopia.login.jwt.UserAuthenticationRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class UserControllerIntegrationTest {
+class UserControllerIntegrationTestWithJwtAuth {
 
 	@Autowired
 	private WebTestClient webClient;
@@ -24,33 +22,11 @@ class UserControllerIntegrationTest {
 	private UserDAO userDao;
 	
 	@Test
-	public void testGetJwtToken() {
-		User user = makeUser();
-		userDao.save(user);
-		UserAuthenticationRequest request = new UserAuthenticationRequest(user.getUsername(), user.getPassword());
-		
-		EntityExchangeResult<String> response = webClient.post().uri("/users/login")
-		.contentType(MediaType.APPLICATION_JSON).bodyValue(request)
-		.exchange().expectStatus().isOk().expectHeader().contentType(MediaType.APPLICATION_JSON)
-		.expectBody(String.class).returnResult();
-		System.out.println(response.getResponseHeaders().get("Authorization").get(0));
-	}
-	
-	@Test
 	public void testFindUserById() {
 		User user = makeUser();
 		userDao.save(user);
 		
-		UserAuthenticationRequest request = new UserAuthenticationRequest(user.getUsername(), user.getPassword());
-		
-		EntityExchangeResult<UserAuthenticationRequest> response = webClient.get().uri("/users/{userId}", user.getUserId())
-		.accept(MediaType.APPLICATION_JSON)
-		.exchange().expectStatus().isOk()
-		.expectBody(UserAuthenticationRequest.class).isEqualTo(request)
-		.returnResult();
-		System.out.println(response.getResponseHeaders().get("Authorization").get(0));
 		webClient.get().uri("/users/{userId}", user.getUserId())
-		.header("Authorization", response.getResponseHeaders().get("Authorization").get(0))
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange().expectStatus().isOk()
 			.expectBody(User.class).isEqualTo(user);
@@ -86,10 +62,6 @@ class UserControllerIntegrationTest {
 		User user = makeUser();
 		userDao.save(user);
 		
-		webClient.post().uri("/users/login").accept(MediaType.APPLICATION_JSON)
-		.exchange().expectStatus().isOk()
-		.expectBody(String.class);
-		
 		webClient.get().uri("/users/email/{email}", user.getEmail())
 			.accept(MediaType.APPLICATION_JSON)
 			.exchange().expectStatus().isOk()
@@ -107,19 +79,16 @@ class UserControllerIntegrationTest {
 	public void testUpdateUser() {
 		User user = makeUser();
 		userDao.save(user);
-		UserAuthenticationRequest request = new UserAuthenticationRequest(user.getUsername(), user.getPassword());
 		
-		EntityExchangeResult<UserAuthenticationRequest> response = webClient.get().uri("/users/{userId}", user.getUserId())
+		webClient.get().uri("/users/{userId}", user.getUserId())
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isOk()
-		.expectBody(UserAuthenticationRequest.class).isEqualTo(request)
-		.returnResult();
+		.expectBody(User.class).isEqualTo(user);
 		
 		user.setGivenName("New");
 		userDao.save(user);
 		
 		webClient.get().uri("/users/{userId}", user.getUserId())
-		.header("Authorization", response.getResponseHeaders().get("Authorization").get(0))
 		.accept(MediaType.APPLICATION_JSON)
 		.exchange().expectStatus().isOk()
 		.expectBody(User.class).isEqualTo(user);

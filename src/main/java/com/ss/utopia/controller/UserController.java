@@ -34,8 +34,6 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	
-
 	@GetMapping("")
 	public List<UserDTO> getAllUsers() {
 		List<User> users = userService.getAllUsers();

@@ -3,45 +3,36 @@ package com.ss.utopia.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.mockito.MockitoAnnotations;
-
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(UserService.class)
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class UserServiceTests {
 
 	@InjectMocks
 	private UserService userService;
 
-	@MockBean
+	@Mock
 	private UserDAO dao;
 
-	@BeforeEach
-	void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-	}
+
 
 	@Test
 	void testGetUserById() throws ResponseStatusException {
@@ -67,10 +58,9 @@ class UserServiceTests {
 		User user = makeUser();
 		List<User> userList = new ArrayList<User>();
 		userList.add(user);
-
 		when(dao.findByUserEmail(user.getEmail())).thenReturn(userList);
 
-		User userFromDB = userService.getUserByEmail("username@email.org");
+		User userFromDB = userService.getUserByEmail(user.getEmail());
 
 		assertThat(userFromDB.getEmail(), is(user.getEmail()));
 	}
