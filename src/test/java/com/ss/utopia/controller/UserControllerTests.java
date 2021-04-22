@@ -117,20 +117,20 @@ class UserControllerTests {
 				.andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 	}
 
-//	@Test
-//	public void testAddUser() throws Exception {
-//		UserDTO user = makeUser();
-//
-//		when(userService.addUser(UserConverter.dtoToEntity(user))).thenReturn(UserConverter.dtoToEntity(user));
-//
-//		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-//				.content(new ObjectMapper().writeValueAsString(user)))
-//				.andExpect(MockMvcResultMatchers.status().isCreated())
-//				.andExpect(MockMvcResultMatchers.header().exists("Location"))
-//				.andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsString("1")));
-//
-//		verify(userService).addUser(UserConverter.dtoToEntity(user));
-//	}
+	@Test
+	public void testAddUser() throws Exception {
+		UserDTO user = makeUser();
+
+		when(userService.addUser(UserConverter.dtoToEntity(user))).thenReturn(UserConverter.dtoToEntity(user));
+
+		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(UserConverter.dtoToEntity(user))))
+				.andExpect(MockMvcResultMatchers.status().isCreated())
+				.andExpect(MockMvcResultMatchers.header().exists("Location"))
+				.andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsString("1")));
+
+		verify(userService).addUser(UserConverter.dtoToEntity(user));
+	}
 
 	@Test
 	public void testUpdateUser() throws Exception {

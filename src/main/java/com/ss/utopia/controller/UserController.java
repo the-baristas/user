@@ -64,7 +64,7 @@ public class UserController {
 	
 
 	@PostMapping("")
-	public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDto, UriComponentsBuilder builder)
+	public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto, UriComponentsBuilder builder)
 			throws ResponseStatusException {
 		
 		User user = UserConverter.dtoToEntity(userDto);
