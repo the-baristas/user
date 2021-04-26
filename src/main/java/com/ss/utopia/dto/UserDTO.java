@@ -38,7 +38,7 @@ public class UserDTO {
 	@NotBlank
 	private String phone;
 	@NotNull
-	private int role;
+	private String role;
 	@NotNull
 	private boolean isActive;
 	
@@ -64,7 +64,7 @@ public class UserDTO {
 	public String getPhone() {
 		return phone;
 	}
-	public int getRole() {
+	public String getRole() {
 		return role;
 	}
 	public boolean isActive() {
@@ -91,7 +91,7 @@ public class UserDTO {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	public void setRole(int role) {
+	public void setRole(String role) {
 		this.role = role;
 	}
 	public void setActive(boolean isActive) {

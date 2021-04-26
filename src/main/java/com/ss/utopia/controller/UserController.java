@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.ss.utopia.converter.UserConverter;
 import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
 
@@ -33,18 +35,21 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private UserRoleService userRoleService;
 
 	@GetMapping("")
 	public List<UserDTO> getAllUsers() {
 		List<User> users = userService.getAllUsers();
-		List<UserDTO> userDtos = users.stream().map((user) -> {return UserConverter.entityToDto(user);})
+		List<UserDTO> userDtos = users.stream().map((user) -> {return entityToDto(user);})
 				.collect(Collectors.toList());
 		return userDtos;
 	}
 
 	@GetMapping("{userId}")
 	public UserDTO getUserById(@PathVariable("userId") Integer userId) throws ResponseStatusException {
-		UserDTO userDto = UserConverter.entityToDto(userService.getUserById(userId));
+		UserDTO userDto = entityToDto(userService.getUserById(userId));
 		return userDto;
 
 	}
@@ -67,16 +72,17 @@ public class UserController {
 	public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto, UriComponentsBuilder builder)
 			throws ResponseStatusException {
 		
-		User user = UserConverter.dtoToEntity(userDto);
+		User user = dtoToEntity(userDto);
+		//user.setRole(userRoleService.getUserRoleByRoleName(userDto.getRole()));
 		
-		UserDTO addedUser = UserConverter.entityToDto(userService.addUser(user));
+		UserDTO addedUser = entityToDto(userService.addUser(user));
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.location(builder.path("/users/{userId}").buildAndExpand(user.getUserId()).toUri()).body(addedUser);
 	}
 	
 	@PutMapping("{userId}")
 	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto) throws ResponseStatusException {
-		User user = UserConverter.dtoToEntity(userDto);
+		User user = dtoToEntity(userDto);
 		userService.updateUser(userId, user);
 		return new ResponseEntity<String>(HttpStatus.OK);
 
@@ -88,6 +94,20 @@ public class UserController {
 		userService.deleteUserById(userId);
 		return new ResponseEntity<String>(HttpStatus.NO_CONTENT);
 
+	}
+	
+	public UserDTO entityToDto(User user) {
+		ModelMapper mapper = new ModelMapper();
+		UserDTO userDto = mapper.map(user, UserDTO.class);
+		userDto.setRole(user.getRole().getRoleName());
+		return userDto;
+	}
+	
+	public User dtoToEntity(UserDTO userDto) {
+		ModelMapper mapper = new ModelMapper();
+		User user = mapper.map(userDto, User.class);
+		user.setRole(userRoleService.getUserRoleByRoleName(userDto.getRole()));
+		return user;
 	}
 
 }

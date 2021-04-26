@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.entity.UserRole;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTests {
@@ -146,7 +147,7 @@ class UserServiceTests {
 		user.setEmail("username@email.org");
 		user.setActive(true);
 		user.setPhone("1111111111");
-		user.setRole(2);
+		user.setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.setPassword("pass");
 		return user;
 	}
@@ -160,7 +161,7 @@ class UserServiceTests {
 		user.get().setEmail("username@email.org");
 		user.get().setActive(true);
 		user.get().setPhone("1111111111");
-		user.get().setRole(2);
+		user.get().setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.get().setPassword("pass");
 		
 		return user;

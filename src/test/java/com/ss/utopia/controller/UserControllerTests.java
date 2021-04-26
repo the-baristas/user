@@ -37,7 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ss.utopia.converter.UserConverter;
 import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.entity.UserRole;
 import com.ss.utopia.login.UtopiaUserDetailsService;
+import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
 @ExtendWith(SpringExtension.class)
@@ -55,6 +57,9 @@ class UserControllerTests {
 	private UserService userService;
 	
 	@MockBean
+	private UserRoleService userRoleService;
+	
+	@MockBean
 	private UtopiaUserDetailsService userDetailsService;
 
 	@Test
@@ -64,32 +69,36 @@ class UserControllerTests {
 
 	@Test
 	void testGetUserById() throws Exception {
-		UserDTO user = makeUser();
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		UserRole role = new UserRole(2, "ROLE_ADMIN");
 
-		when(userService.getUserById(1)).thenReturn(UserConverter.dtoToEntity(user));
+		
+		when(userService.getUserById(1)).thenReturn(user);
 
 		mockMvc.perform(get("/users/1").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.userId").value(user.getUserId()))
-				.andExpect(jsonPath("$.givenName").value(user.getGivenName()))
-				.andExpect(jsonPath("$.familyName").value(user.getFamilyName()))
-				.andExpect(jsonPath("$.email").value(user.getEmail()))
-				.andExpect(jsonPath("$.role").value(user.getRole()))
-				.andExpect(jsonPath("$.phone").value(user.getPhone())).andExpect(status().isOk());
+				.andExpect(jsonPath("$.userId").value(userDto.getUserId()))
+				.andExpect(jsonPath("$.givenName").value(userDto.getGivenName()))
+				.andExpect(jsonPath("$.familyName").value(userDto.getFamilyName()))
+				.andExpect(jsonPath("$.email").value(userDto.getEmail()))
+				.andExpect(jsonPath("$.role").value(userDto.getRole()))
+				.andExpect(jsonPath("$.phone").value(userDto.getPhone())).andExpect(status().isOk());
 	}
 	
 	@Test
 	void testGetUserByEmail() throws Exception {
-		UserDTO user = makeUser();
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
 
-		when(userService.getUserByEmail("username@email.org")).thenReturn(UserConverter.dtoToEntity(user));
+		when(userService.getUserByEmail("username@email.org")).thenReturn(user);
 
 		mockMvc.perform(get("/users/email/username@email.org").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.userId").value(user.getUserId()))
-				.andExpect(jsonPath("$.givenName").value(user.getGivenName()))
-				.andExpect(jsonPath("$.familyName").value(user.getFamilyName()))
-				.andExpect(jsonPath("$.email").value(user.getEmail()))
-				.andExpect(jsonPath("$.role").value(user.getRole()))
-				.andExpect(jsonPath("$.phone").value(user.getPhone())).andExpect(status().isOk());
+				.andExpect(jsonPath("$.userId").value(userDto.getUserId()))
+				.andExpect(jsonPath("$.givenName").value(userDto.getGivenName()))
+				.andExpect(jsonPath("$.familyName").value(userDto.getFamilyName()))
+				.andExpect(jsonPath("$.email").value(userDto.getEmail()))
+				.andExpect(jsonPath("$.role").value(userDto.getRole()))
+				.andExpect(jsonPath("$.phone").value(userDto.getPhone())).andExpect(status().isOk());
 	}
 
 	@Test
@@ -102,16 +111,25 @@ class UserControllerTests {
 
 	@Test
 	void testGetAll() throws Exception {
-		List<UserDTO> users = new ArrayList<UserDTO>();
-		UserDTO user1 = makeUser();
-		UserDTO user2 = makeUser();
+		List<User> users = new ArrayList<User>();
+		User user1 = makeUser();
+		User user2 = makeUser();
 		user2.setUserId(2);
 		user2.setEmail("bb@gmail.com");
 		user2.setPhone("8195678900");
 		users.add(user1);
 		users.add(user2);
-
-		when(userService.getAllUsers()).thenReturn(users.stream().map((user) -> {return UserConverter.dtoToEntity(user);}).collect(Collectors.toList()));
+		
+		List<UserDTO> userDtos = new ArrayList<UserDTO>();
+		UserDTO userDto1 = makeUserDTO();
+		UserDTO userDto2 = makeUserDTO();
+		userDto2.setUserId(2);
+		userDto2.setEmail("bb@gmail.com");
+		userDto2.setPhone("8195678900");
+		userDtos.add(userDto1);
+		userDtos.add(userDto2);
+				
+		when(userService.getAllUsers()).thenReturn(users);
 
 		mockMvc.perform(get("/users").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
@@ -119,41 +137,44 @@ class UserControllerTests {
 
 	@Test
 	public void testAddUser() throws Exception {
-		UserDTO user = makeUser();
-
-		when(userService.addUser(UserConverter.dtoToEntity(user))).thenReturn(UserConverter.dtoToEntity(user));
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		
+		when(userService.addUser(controller.dtoToEntity(userDto))).thenReturn(user);
 
 		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(UserConverter.dtoToEntity(user))))
+				.content(new ObjectMapper().writeValueAsString(controller.dtoToEntity(userDto))))
 				.andExpect(MockMvcResultMatchers.status().isCreated())
 				.andExpect(MockMvcResultMatchers.header().exists("Location"))
 				.andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsString("1")));
 
-		verify(userService).addUser(UserConverter.dtoToEntity(user));
+		verify(userService).addUser(UserConverter.dtoToEntity(userDto));
 	}
 
 	@Test
 	public void testUpdateUser() throws Exception {
-		UserDTO user = makeUser();
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
 
-		when(userService.getUserById(user.getUserId())).thenReturn(UserConverter.dtoToEntity(user));
+		when(userService.getUserById(userDto.getUserId())).thenReturn(user);
 
-		when(userService.updateUser(user.getUserId(), UserConverter.dtoToEntity(user))).thenReturn(UserConverter.dtoToEntity(user));
-		mockMvc.perform(put("/users/{userId}", user.getUserId(), user).contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(user))).andExpect(status().isOk());
+		when(userService.updateUser(userDto.getUserId(), controller.dtoToEntity(userDto))).thenReturn(UserConverter.dtoToEntity(userDto));
+		mockMvc.perform(put("/users/{userId}", userDto.getUserId(), userDto).contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(userDto))).andExpect(status().isOk());
 
 	}
 
 	@Test
 	public void testDeleteUser() throws Exception {
-		UserDTO user = makeUser();
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		
+		when(userService.getUserById(userDto.getUserId())).thenReturn(user);
 
-		when(userService.getUserById(user.getUserId())).thenReturn(UserConverter.dtoToEntity(user));
+		doNothing().when(userService).deleteUserById(userDto.getUserId());
+		mockMvc.perform(delete("/users/{userId}", userDto.getUserId())).andExpect(status().isNoContent());
 
-		doNothing().when(userService).deleteUserById(user.getUserId());
-		mockMvc.perform(delete("/users/{userId}", user.getUserId())).andExpect(status().isNoContent());
-
-		verify(userService, times(1)).deleteUserById(user.getUserId());
+		verify(userService, times(1)).deleteUserById(userDto.getUserId());
 		verifyNoMoreInteractions(userService);
 	}
 	
@@ -165,7 +186,11 @@ class UserControllerTests {
 		mockMvc.perform(delete("/users/99")).andExpect(status().isNotFound());
 	}
 
-	private UserDTO makeUser() {
+	private UserDTO makeUserDTO() {
+		return controller.entityToDto(makeUser());
+	}
+	
+	private User makeUser() {
 		User user = new User();
 		user.setUserId(1);
 		user.setGivenName("First");
@@ -174,8 +199,8 @@ class UserControllerTests {
 		user.setEmail("username@email.org");
 		user.setActive(true);
 		user.setPhone("1111111111");
-		user.setRole(2);
+		user.setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.setPassword("pass");
-		return UserConverter.entityToDto(user);
+		return user;
 	}
 }
