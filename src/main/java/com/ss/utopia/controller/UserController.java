@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.ss.utopia.converter.UserConverter;
 import com.ss.utopia.dto.UserDTO;
@@ -39,6 +40,7 @@ public class UserController {
 	@Autowired
 	private UserRoleService userRoleService;
 
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("")
 	public List<UserDTO> getAllUsers() {
 		List<User> users = userService.getAllUsers();
@@ -47,6 +49,7 @@ public class UserController {
 		return userDtos;
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@GetMapping("{userId}")
 	public UserDTO getUserById(@PathVariable("userId") Integer userId) throws ResponseStatusException {
 		UserDTO userDto = entityToDto(userService.getUserById(userId));
@@ -54,13 +57,15 @@ public class UserController {
 
 	}
 
-
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("email/{email}")
 	public UserDTO getUserByEmail(@PathVariable("email") String email) throws ResponseStatusException {
 		
 		return UserConverter.entityToDto(userService.getUserByEmail(email));
 
 	}
+	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("username/{username}")
 	public UserDTO getUserByUsername(@PathVariable("username") String username) throws ResponseStatusException{
 		
@@ -72,14 +77,13 @@ public class UserController {
 	public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto, UriComponentsBuilder builder)
 			throws ResponseStatusException {
 		
-		User user = dtoToEntity(userDto);
-		//user.setRole(userRoleService.getUserRoleByRoleName(userDto.getRole()));
-		
+		User user = dtoToEntity(userDto);		
 		UserDTO addedUser = entityToDto(userService.addUser(user));
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.location(builder.path("/users/{userId}").buildAndExpand(user.getUserId()).toUri()).body(addedUser);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@PutMapping("{userId}")
 	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto) throws ResponseStatusException {
 		User user = dtoToEntity(userDto);
@@ -88,6 +92,7 @@ public class UserController {
 
 	}
 
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@DeleteMapping("{userId}")
 	public ResponseEntity<String> deleteUser(@PathVariable Integer userId) throws ResponseStatusException {
 

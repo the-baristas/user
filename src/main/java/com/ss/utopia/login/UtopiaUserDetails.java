@@ -27,6 +27,7 @@ public class UtopiaUserDetails implements UserDetails {
 	public UtopiaUserDetails(User user) {
 		this.username = user.getUsername();
 		this.password = user.getPassword();
+		this.authorities = Arrays.asList(new SimpleGrantedAuthority(user.getRole().getRoleName()));
 		this.isActive = user.isActive();
 	}
 
@@ -37,7 +38,7 @@ public class UtopiaUserDetails implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		// TODO Auto-generated method stub
-		return Arrays.asList(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+		return authorities;
 	}
 
 	@Override

@@ -40,17 +40,24 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 		}
 		
 		try {
+			//Retrieve the token from the header, and remove the "Bearer: " portion from the token
 			String token = requestAuthHeader.replace(JwtUtils.getTokenPrefix(), "");
+			
+			//Claims represents the fields of a JWT (sub, authorities, etc) as an object
 			Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(JwtUtils.getRawKey().getBytes()).build()
 			.parseClaimsJws(token);
 			
+			//Retrieve the necessary fields
 			String username = claims.getBody().getSubject();
 			List<Map<String, String>> authorities =(List<Map<String, String>>)  claims.getBody().get("authorities");
 			
+			//Build the simpleGrantedAuthorities
 			Set<SimpleGrantedAuthority> simpleGrantedAuthorities= authorities.stream()
 			.map(m -> new SimpleGrantedAuthority(m.get("authority")))
 			.collect(Collectors.toSet());
+		
 			
+			//Set the security context for the current session to reflect this token 
 			Authentication authentication = new UsernamePasswordAuthenticationToken(
 					username,
 					null,

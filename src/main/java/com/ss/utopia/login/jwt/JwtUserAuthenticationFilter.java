@@ -58,6 +58,7 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		
+		//Build token
 		String token = Jwts.builder().setSubject(authResult.getName())
 			.claim("authorities", authResult.getAuthorities())
 			.setIssuedAt(new Date())
@@ -65,6 +66,7 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 			.signWith(JwtUtils.getSecretKey())
 			.compact();
 
+		//Add the token to the response
 		response.addHeader(JwtUtils.getAuthorizationHeader(), JwtUtils.getTokenPrefix() + token);
 		response.setContentType("application/json");
 	    response.setCharacterEncoding("UTF-8");
