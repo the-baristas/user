@@ -40,7 +40,7 @@ public class UserController {
 	@Autowired
 	private UserRoleService userRoleService;
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("")
 	public List<UserDTO> getAllUsers() {
 		List<User> users = userService.getAllUsers();
@@ -49,7 +49,7 @@ public class UserController {
 		return userDtos;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	//@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@GetMapping("{userId}")
 	public UserDTO getUserById(@PathVariable("userId") Integer userId) throws ResponseStatusException {
 		UserDTO userDto = entityToDto(userService.getUserById(userId));
@@ -57,7 +57,7 @@ public class UserController {
 
 	}
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("email/{email}")
 	public UserDTO getUserByEmail(@PathVariable("email") String email) throws ResponseStatusException {
 		
@@ -65,7 +65,7 @@ public class UserController {
 
 	}
 	
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("username/{username}")
 	public UserDTO getUserByUsername(@PathVariable("username") String username) throws ResponseStatusException{
 		
@@ -83,7 +83,7 @@ public class UserController {
 				.location(builder.path("/users/{userId}").buildAndExpand(user.getUserId()).toUri()).body(addedUser);
 	}
 	
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	//@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@PutMapping("{userId}")
 	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto) throws ResponseStatusException {
 		User user = dtoToEntity(userDto);
@@ -92,7 +92,7 @@ public class UserController {
 
 	}
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@DeleteMapping("{userId}")
 	public ResponseEntity<String> deleteUser(@PathVariable Integer userId) throws ResponseStatusException {
 
