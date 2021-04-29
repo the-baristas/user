@@ -1,9 +1,8 @@
 package com.ss.utopia.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +14,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.ss.utopia.converter.UserConverter;
 import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.login.jwt.JwtTokenVerifier;
 import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
@@ -51,10 +50,12 @@ public class UserController {
 
 	//@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@GetMapping("{userId}")
-	public UserDTO getUserById(@PathVariable("userId") Integer userId) throws ResponseStatusException {
+	public UserDTO getUserById(@PathVariable("userId") Integer userId, @RequestHeader Map<String,String> header) throws ResponseStatusException {
 		UserDTO userDto = entityToDto(userService.getUserById(userId));
+		
+		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
+		
 		return userDto;
-
 	}
 
 	//@PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -113,6 +114,21 @@ public class UserController {
 		User user = mapper.map(userDto, User.class);
 		user.setRole(userRoleService.getUserRoleByRoleName(userDto.getRole()));
 		return user;
+	}
+	
+	public void checkUsernameRequestMatchesResponse(Map<String, String> header, String responseUsername) {
+		JwtTokenVerifier tokenVerifier = new JwtTokenVerifier();
+		String username = tokenVerifier.getUsernameFromToken(header.get("authorization"));
+		String role = new JwtTokenVerifier().getRoleFromToken(header.get("authorization"));
+		
+		//if the user who sent the request is an admin, then they other users' information
+		if(!role.contains("ADMIN")) {
+			//otherwise, the username of the request must match the username of the response
+			if(!username.equals(responseUsername)) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can access another user's information.");
+
+			}
+		}
 	}
 
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,7 +16,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +32,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -39,8 +44,11 @@ import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
 import com.ss.utopia.login.UtopiaUserDetailsService;
+import com.ss.utopia.login.jwt.JwtUtils;
 import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
+
+import io.jsonwebtoken.Jwts;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(UserController.class)
@@ -73,16 +81,44 @@ class UserControllerTests {
 		UserDTO userDto = makeUserDTO();
 		UserRole role = new UserRole(2, "ROLE_ADMIN");
 
+		//Build tokens
+		String adminToken = Jwts.builder().setSubject("someUsername23")
+			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+			.setIssuedAt(new Date())
+			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
+			.signWith(JwtUtils.getSecretKey())
+			.compact();
 		
 		when(userService.getUserById(1)).thenReturn(user);
 
-		mockMvc.perform(get("/users/1").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/users/1").header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.userId").value(userDto.getUserId()))
 				.andExpect(jsonPath("$.givenName").value(userDto.getGivenName()))
 				.andExpect(jsonPath("$.familyName").value(userDto.getFamilyName()))
 				.andExpect(jsonPath("$.email").value(userDto.getEmail()))
 				.andExpect(jsonPath("$.role").value(userDto.getRole()))
 				.andExpect(jsonPath("$.phone").value(userDto.getPhone())).andExpect(status().isOk());
+	}
+	
+	@Test
+	void testGetUserByIdThrowsExceptionWhenRequestUsernameDoesNotMatchResponseUsername() throws Exception {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		userDto.setRole("ROLE_CUSTOMER");
+		UserRole role = new UserRole(2, "ROLE_CUSTOMER");
+
+		//Build tokens
+		String adminToken = Jwts.builder().setSubject("differentUsername")
+			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+			.setIssuedAt(new Date())
+			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
+			.signWith(JwtUtils.getSecretKey())
+			.compact();
+		
+		when(userService.getUserById(1)).thenReturn(user);
+
+		mockMvc.perform(get("/users/1").header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isForbidden());
 	}
 	
 	@Test

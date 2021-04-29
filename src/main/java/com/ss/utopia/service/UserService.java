@@ -46,7 +46,7 @@ public class UserService {
 	}
 
 	public User addUser(User user) throws ResponseStatusException {
-		checkUserFieldsFilled(user);
+		//checkUserFieldsFilled(user);
 
 		Utils.checkEmailValid(user.getEmail());
 		Utils.checkPhoneNumberValid(user.getPhone());

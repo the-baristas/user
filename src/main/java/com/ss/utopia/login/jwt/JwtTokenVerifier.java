@@ -40,12 +40,8 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 		}
 		
 		try {
-			//Retrieve the token from the header, and remove the "Bearer: " portion from the token
-			String token = requestAuthHeader.replace(JwtUtils.getTokenPrefix(), "");
-			
 			//Claims represents the fields of a JWT (sub, authorities, etc) as an object
-			Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(JwtUtils.getRawKey().getBytes()).build()
-			.parseClaimsJws(token);
+			Jws<Claims> claims = getJwsClaims(requestAuthHeader);
 			
 			//Retrieve the necessary fields
 			String username = claims.getBody().getSubject();
@@ -72,4 +68,28 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
+	private Jws<Claims> getJwsClaims(String bearerToken){
+		//Retrieve the token from the header, and remove the "Bearer: " portion from the token
+		String token = bearerToken.replace(JwtUtils.getTokenPrefix(), "");
+		
+		//Claims represents the fields of a JWT (sub, authorities, etc) as an object
+		return Jwts.parserBuilder().setSigningKey(JwtUtils.getRawKey().getBytes()).build()
+		.parseClaimsJws(token);
+	}
+	
+	public String getUsernameFromToken(String bearerToken) {
+		Jws<Claims> claims = getJwsClaims(bearerToken);
+		
+		//Retrieve subject (username)
+		return claims.getBody().getSubject();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public String getRoleFromToken(String bearerToken) {
+		Jws<Claims> claims = getJwsClaims(bearerToken);
+		List<Map<String, String>> authorities =(List<Map<String, String>>)  claims.getBody().get("authorities");
+		
+		return authorities.get(0).get("authority");
+	}
+	
 }
