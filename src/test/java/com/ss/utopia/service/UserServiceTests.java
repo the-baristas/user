@@ -3,45 +3,37 @@ package com.ss.utopia.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.mockito.MockitoAnnotations;
-
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.entity.UserRole;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(UserService.class)
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class UserServiceTests {
 
 	@InjectMocks
 	private UserService userService;
 
-	@MockBean
+	@Mock
 	private UserDAO dao;
 
-	@BeforeEach
-	void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-	}
+
 
 	@Test
 	void testGetUserById() throws ResponseStatusException {
@@ -67,10 +59,9 @@ class UserServiceTests {
 		User user = makeUser();
 		List<User> userList = new ArrayList<User>();
 		userList.add(user);
-
 		when(dao.findByUserEmail(user.getEmail())).thenReturn(userList);
 
-		User userFromDB = userService.getUserByEmail("username@email.org");
+		User userFromDB = userService.getUserByEmail(user.getEmail());
 
 		assertThat(userFromDB.getEmail(), is(user.getEmail()));
 	}
@@ -128,21 +119,21 @@ class UserServiceTests {
 		User newUser = userService.addUser(user.get());
 		
 		user.get().setGivenName("ChangedFirstName");
-		userService.updateUser(user.get());
+		userService.updateUser(1, user.get());
 		
 		assertThat(newUser.getUserId(), is(user.get().getUserId()));
 		assertThat(newUser.getGivenName(), is(user.get().getGivenName()));
 	}
 	
 	@Test
-	void testUpdateUserNoSuchElementException() {
+	void testUpdateResponseStatusExceptionException() {
 		User user = makeUser();
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
-			userService.updateUser(user);});
+			userService.updateUser(1, user);});
 	}
 	
 	@Test
-	void testDeleteUserNoSuchElementException() {
+	void testDeleteResponseStatusExceptionException() {
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.deleteUserById(23);});
 	}
@@ -154,9 +145,9 @@ class UserServiceTests {
 		user.setFamilyName("Last");
 		user.setUsername("someusername23");
 		user.setEmail("username@email.org");
-		user.setIsActive(true);
+		user.setActive(true);
 		user.setPhone("1111111111");
-		user.setRole(2);
+		user.setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.setPassword("pass");
 		return user;
 	}
@@ -168,9 +159,9 @@ class UserServiceTests {
 		user.get().setFamilyName("Last");
 		user.get().setUsername("someusername23");
 		user.get().setEmail("username@email.org");
-		user.get().setIsActive(true);
+		user.get().setActive(true);
 		user.get().setPhone("1111111111");
-		user.get().setRole(2);
+		user.get().setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.get().setPassword("pass");
 		
 		return user;

@@ -1,14 +1,28 @@
 package com.ss.utopia.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "user")
+@Getter
+@Setter
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,21 +35,27 @@ public class User {
 	@Column(name = "family_name")
 	private String familyName;
 	
-	@Column(name = "username")
+	@Column(name = "username", unique = true)
 	private String username;
 	
-	@Column(name = "email")
+	@Email
+	@Column(name = "email", unique = true)
 	private String email;
 	
 	@Column(name = "password")
+	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
 	
-	@Column(name = "phone")
+	@Column(name = "phone", unique = true)
 	private String phone;
 	
-	@Column(name = "role")
-	private int role;
-
+//	@Column(name = "role")
+//	private int role;
+	
+	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "role", referencedColumnName = "id", insertable = false, updatable = true)
+	private UserRole role;
+	
 	@Column(name = "is_active")
 	private boolean isActive;
 	
@@ -72,12 +92,10 @@ public class User {
 	}
 
 	public String getPassword() {
-		//decryption should happen here
 		return password;
 	}
 
 	public void setPassword(String password) {
-		//encryption should happen
 		this.password = password;
 	}
 
@@ -97,26 +115,32 @@ public class User {
 		this.username = username;
 	}
 
-	public int getRole() {
+	public UserRole getRole() {
 		return role;
 	}
 
-	public void setRole(int role) {
+	public void setRole(UserRole role) {
 		this.role = role;
 	}
 
-	public boolean getIsActive() {
+	public boolean isActive() {
 		return isActive;
 	}
 
-	public void setIsActive(boolean isActive) {
+	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
+	
+//	public String getRoleName() {
+//		return role.getRoleName();
+//	}
+
 
 	@Override
 	public String toString() {
-		return "User [userId=" + userId + ", givenName=" + givenName + ", familyName=" + familyName + ", email=" + email
-				+ ", password=" + password + ", phone=" + phone + ", role=" + role + ", isActive=" + isActive + "]";
+		return "User [userId=" + userId + ", givenName=" + givenName + ", familyName=" + familyName + ", username="
+				+ username + ", email=" + email + ", password=" + password + ", phone=" + phone + ", role=" + role.toString()
+				+ ", isActive=" + isActive + "]";
 	}
 
 	@Override

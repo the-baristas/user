@@ -27,4 +27,12 @@ public class Utils {
 
 	}
 	
+	public static void checkPhoneNumberValid(String phoneNumber) throws ResponseStatusException{
+		Pattern pattern = Pattern.compile("^\\d{10}$");
+		Matcher matcher = pattern.matcher(phoneNumber);
+		if(!matcher.find())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"Phone number should be 10 digits and contain no hyphens, spaces, etc.");
+	}
+	
 }

@@ -1,9 +1,11 @@
 package com.ss.utopia.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,65 +20,99 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.security.access.prepost.PreAuthorize;
 
+import com.ss.utopia.converter.UserConverter;
+import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.User;
-
+import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
 
 
 @RestController
-@RequestMapping("/utopia_airlines/user")
+@RequestMapping("/users")
 public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private UserRoleService userRoleService;
 
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("")
-	public List<User> getAllUsers() {
-		return userService.getAllUsers();
+	public List<UserDTO> getAllUsers() {
+		List<User> users = userService.getAllUsers();
+		List<UserDTO> userDtos = users.stream().map((user) -> {return entityToDto(user);})
+				.collect(Collectors.toList());
+		return userDtos;
 	}
 
+	//@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@GetMapping("{userId}")
-	public User getUserById(@PathVariable("userId") Integer userId) throws ResponseStatusException {
-
-		return userService.getUserById(userId);
+	public UserDTO getUserById(@PathVariable("userId") Integer userId) throws ResponseStatusException {
+		UserDTO userDto = entityToDto(userService.getUserById(userId));
+		return userDto;
 
 	}
 
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("email/{email}")
-	public User getUserById(@PathVariable("email") String email) throws ResponseStatusException {
-
-		return userService.getUserByEmail(email);
+	public UserDTO getUserByEmail(@PathVariable("email") String email) throws ResponseStatusException {
+		
+		return UserConverter.entityToDto(userService.getUserByEmail(email));
 
 	}
+	
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("username/{username}")
-	public User getUserByUsername(@PathVariable("username") String username) throws ResponseStatusException{
-		return userService.getUserByUsername(username);
+	public UserDTO getUserByUsername(@PathVariable("username") String username) throws ResponseStatusException{
+		
+		return UserConverter.entityToDto(userService.getUserByUsername(username));
 	}
 	
 
 	@PostMapping("")
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<String> createUser(@Valid @RequestBody User user, UriComponentsBuilder builder)
+	public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto, UriComponentsBuilder builder)
 			throws ResponseStatusException {
-		userService.addUser(user);
-		return ResponseEntity.created(builder.path("/utopia_airlines/user/{userId}").build(user.getUserId())).build();
+		
+		User user = dtoToEntity(userDto);		
+		UserDTO addedUser = entityToDto(userService.addUser(user));
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.location(builder.path("/users/{userId}").buildAndExpand(user.getUserId()).toUri()).body(addedUser);
 	}
 	
-	@PutMapping("")
-	public ResponseEntity<String> updateUser(@RequestBody User user) throws ResponseStatusException {
-		userService.updateUser(user);
+	//@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@PutMapping("{userId}")
+	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto) throws ResponseStatusException {
+		User user = dtoToEntity(userDto);
+		userService.updateUser(userId, user);
 		return new ResponseEntity<String>(HttpStatus.OK);
 
 	}
 
+	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@DeleteMapping("{userId}")
 	public ResponseEntity<String> deleteUser(@PathVariable Integer userId) throws ResponseStatusException {
 
 		userService.deleteUserById(userId);
 		return new ResponseEntity<String>(HttpStatus.NO_CONTENT);
 
+	}
+	
+	public UserDTO entityToDto(User user) {
+		ModelMapper mapper = new ModelMapper();
+		UserDTO userDto = mapper.map(user, UserDTO.class);
+		userDto.setRole(user.getRole().getRoleName());
+		return userDto;
+	}
+	
+	public User dtoToEntity(UserDTO userDto) {
+		ModelMapper mapper = new ModelMapper();
+		User user = mapper.map(userDto, User.class);
+		user.setRole(userRoleService.getUserRoleByRoleName(userDto.getRole()));
+		return user;
 	}
 
 }
