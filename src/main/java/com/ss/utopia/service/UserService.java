@@ -23,10 +23,6 @@ public class UserService {
 		return userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 	}
-
-	public List<User> getAllUsers() {
-		return userDAO.findAll();
-	}
 	
 	public Page<User> getAllUsers(Integer page, Integer size){
 		return userDAO.findAll(PageRequest.of(page, size));
