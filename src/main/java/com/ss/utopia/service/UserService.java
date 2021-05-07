@@ -3,7 +3,8 @@ package com.ss.utopia.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,9 +23,9 @@ public class UserService {
 		return userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 	}
-
-	public List<User> getAllUsers() {
-		return userDAO.findAll();
+	
+	public Page<User> getAllUsers(Integer page, Integer size){
+		return userDAO.findAll(PageRequest.of(page, size));
 	}
 
 	public User getUserByEmail(String email) throws ResponseStatusException {
@@ -42,6 +43,14 @@ public class UserService {
 			return userDAO.findByUsername(username).get(0);
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with username = " + username);
+		}
+	}
+	
+	public User getUserByPhoneNumber(String phone) {
+		try {
+			return userDAO.findByPhoneNumber(phone).get(0);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with phone number = " + phone);
 		}
 	}
 

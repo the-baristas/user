@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -38,39 +40,49 @@ public class UserController {
 	
 	@Autowired
 	private UserRoleService userRoleService;
-
-	//@PreAuthorize("hasRole('ROLE_ADMIN')")
+	
 	@GetMapping("")
-	public List<UserDTO> getAllUsers() {
-		List<User> users = userService.getAllUsers();
-		List<UserDTO> userDtos = users.stream().map((user) -> {return entityToDto(user);})
-				.collect(Collectors.toList());
-		return userDtos;
+	public Page<UserDTO> getAllUsers(@RequestParam(name="page") Integer page, @RequestParam(name="size") Integer size){
+		Page<User> userPage = userService.getAllUsers(page, size);
+		Page<UserDTO> userDtoPage = userPage.map((user) -> {return entityToDto(user);});
+		return userDtoPage;
 	}
+	
 
-	//@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@GetMapping("{userId}")
-	public UserDTO getUserById(@PathVariable("userId") Integer userId, @RequestHeader Map<String,String> header) throws ResponseStatusException {
+	public UserDTO getUserById(@PathVariable("userId") Integer userId,
+			@RequestHeader Map<String,String> header) throws ResponseStatusException {
+		
 		UserDTO userDto = entityToDto(userService.getUserById(userId));
-		
 		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
-		
 		return userDto;
 	}
 
-	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("email/{email}")
-	public UserDTO getUserByEmail(@PathVariable("email") String email) throws ResponseStatusException {
+	public UserDTO getUserByEmail(@PathVariable("email") String email,
+			 @RequestHeader Map<String,String> header) throws ResponseStatusException {
 		
-		return UserConverter.entityToDto(userService.getUserByEmail(email));
+		UserDTO userDto = entityToDto(userService.getUserByEmail(email));
+		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
+		return userDto;
 
 	}
 	
-	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("username/{username}")
-	public UserDTO getUserByUsername(@PathVariable("username") String username) throws ResponseStatusException{
-		
-		return UserConverter.entityToDto(userService.getUserByUsername(username));
+	public UserDTO getUserByUsername(@PathVariable("username") String username,
+			 @RequestHeader Map<String,String> header) throws ResponseStatusException{
+		UserDTO userDto = entityToDto(userService.getUserByUsername(username));
+		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
+		return userDto;
+	}
+	
+	@GetMapping("phone/{phone}")
+	public UserDTO getUserByPhoneNumber(@PathVariable("phone") String phone,
+			 @RequestHeader Map<String,String> header) {
+
+		UserDTO userDto = entityToDto(userService.getUserByPhoneNumber(phone));
+		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
+		return userDto;
 	}
 	
 
@@ -84,7 +96,6 @@ public class UserController {
 				.location(builder.path("/users/{userId}").buildAndExpand(user.getUserId()).toUri()).body(addedUser);
 	}
 	
-	//@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@PutMapping("{userId}")
 	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto) throws ResponseStatusException {
 		User user = dtoToEntity(userDto);
@@ -93,7 +104,6 @@ public class UserController {
 
 	}
 
-	//@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@DeleteMapping("{userId}")
 	public ResponseEntity<String> deleteUser(@PathVariable Integer userId) throws ResponseStatusException {
 

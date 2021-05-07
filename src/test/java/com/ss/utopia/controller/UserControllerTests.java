@@ -26,10 +26,13 @@ import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springdoc.core.converters.models.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -125,10 +128,18 @@ class UserControllerTests {
 	void testGetUserByEmail() throws Exception {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
+		
+		//Build tokens
+		String adminToken = Jwts.builder().setSubject("someUsername23")
+			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+			.setIssuedAt(new Date())
+			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
+			.signWith(JwtUtils.getSecretKey())
+			.compact();
 
 		when(userService.getUserByEmail("username@email.org")).thenReturn(user);
 
-		mockMvc.perform(get("/users/email/username@email.org").contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/users/email/username@email.org").header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.userId").value(userDto.getUserId()))
 				.andExpect(jsonPath("$.givenName").value(userDto.getGivenName()))
 				.andExpect(jsonPath("$.familyName").value(userDto.getFamilyName()))
@@ -136,6 +147,31 @@ class UserControllerTests {
 				.andExpect(jsonPath("$.role").value(userDto.getRole()))
 				.andExpect(jsonPath("$.phone").value(userDto.getPhone())).andExpect(status().isOk());
 	}
+	
+	@Test
+	void testGetUserByPhone() throws Exception {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		
+		//Build tokens
+		String adminToken = Jwts.builder().setSubject("someUsername23")
+			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+			.setIssuedAt(new Date())
+			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
+			.signWith(JwtUtils.getSecretKey())
+			.compact();
+
+		when(userService.getUserByPhoneNumber("1111111111")).thenReturn(user);
+
+		mockMvc.perform(get("/users/phone/1111111111").header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.userId").value(userDto.getUserId()))
+				.andExpect(jsonPath("$.givenName").value(userDto.getGivenName()))
+				.andExpect(jsonPath("$.familyName").value(userDto.getFamilyName()))
+				.andExpect(jsonPath("$.email").value(userDto.getEmail()))
+				.andExpect(jsonPath("$.role").value(userDto.getRole()))
+				.andExpect(jsonPath("$.phone").value(userDto.getPhone())).andExpect(status().isOk());
+	}
+	
 
 	@Test
 	void testUserGetByIdThrowsUserNotFoundException() throws Exception {
@@ -164,11 +200,13 @@ class UserControllerTests {
 		userDto2.setPhone("8195678900");
 		userDtos.add(userDto1);
 		userDtos.add(userDto2);
+		
+		Page<User> userPage = new PageImpl<User>(users);
 				
-		when(userService.getAllUsers()).thenReturn(users);
+		when(userService.getAllUsers(0, 2)).thenReturn(userPage);
 
-		mockMvc.perform(get("/users").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
+		mockMvc.perform(get("/users?page=0&size=2").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
 	}
 
 	@Test

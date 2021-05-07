@@ -17,7 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.dao.UserDAO;
@@ -33,6 +35,27 @@ class UserServiceTests {
 	@Mock
 	private UserDAO dao;
 
+	
+	@Test
+	void testGetAllUsersPageable(){
+		List<User> users = new ArrayList<User>();
+		User user1 = makeUser();
+		User user2 = makeUser();
+		user2.setUserId(2);
+		user2.setEmail("bb@gmail.com");
+		user2.setUsername("username4567");
+		user2.setPhone("8195678900");
+		users.add(user1);
+		users.add(user2);
+		
+		PageRequest pageRequest = PageRequest.of(0, 2);
+		Page<User> userPage = new PageImpl<User>(users);
+		
+		when(dao.findAll(pageRequest)).thenReturn(userPage);
+		
+		assertThat(userService.getAllUsers(0,2), is(userPage));
+		
+	}
 
 
 	@Test
@@ -71,6 +94,22 @@ class UserServiceTests {
 			userService.getUserByEmail("doesntexist@nope.nop");});
 	}
 	
+	@Test
+	void testAddUserWithInvalidEmailException() {
+		User user = makeUser();
+
+		user.setEmail("invalidemail.com");
+
+		assertThrows(ResponseStatusException.class, () -> {
+			userService.addUser(user);
+		});
+
+		user.setEmail("email@invalid..net");
+		assertThrows(ResponseStatusException.class, () -> {
+			userService.addUser(user);
+		});
+	}
+	
 	///Test Get by username
 	
 	@Test
@@ -91,23 +130,29 @@ class UserServiceTests {
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.getUserByUsername("someusername23");});
 	}
-
-
+	
+	//Test Get by phone number
+	
 	@Test
-	void testAddUserWithInvalidEmailException() {
+	void testGetUserByPhoneNumber() throws ResponseStatusException {
 		User user = makeUser();
+		List<User> userList = new ArrayList<User>();
+		userList.add(user);
+;
+		when(dao.findByPhoneNumber(user.getPhone())).thenReturn(userList);
 
-		user.setEmail("invalidemail.com");
+		User userFromDB = userService.getUserByPhoneNumber("1111111111");
 
-		assertThrows(ResponseStatusException.class, () -> {
-			userService.addUser(user);
-		});
-
-		user.setEmail("email@invalid..net");
-		assertThrows(ResponseStatusException.class, () -> {
-			userService.addUser(user);
-		});
+		assertThat(userFromDB.getPhone(), is(user.getPhone()));
 	}
+	
+	@Test
+	void testGetUserByPhoneNumberThrowsResponseStatusException() {
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
+			userService.getUserByPhoneNumber("1111111111");});
+	}
+	
+	
 	
 	@Test
 	void testUpdateUser() throws ResponseStatusException {
