@@ -14,15 +14,6 @@ pipeline {
                 sh 'mvn package'
             }
         }
-        stage('Docker Build') {
-            steps {
-                echo 'Deploying....'
-                // sh "aws ecr ........."
-                sh "docker build --tag user-service:$COMMIT_HASH ."
-                // sh "docker tag user-service:$COMMIT_HASH $AWS_ID/ECR Repo/user-service:$COMMIT_HASH"
-                // sh "docker push $AWS_ID/ECR Repo/user-service:$COMMIT_HASH"
-            }
-        }
          stage('Code Analysis: Sonarqube') {
              steps {
                  withSonarQubeEnv('SonarQube') {
@@ -35,6 +26,16 @@ pipeline {
                  //waitForQualityGate abortPipeline: true
             // }
         // }
+        stage('Docker Build') {
+            steps {
+                echo 'Deploying....'
+                // sh "aws ecr ........."
+                sh "docker build --tag user-service:$COMMIT_HASH ."
+                // sh "docker tag user-service:$COMMIT_HASH $AWS_ID/ECR Repo/user-service:$COMMIT_HASH"
+                // sh "docker push $AWS_ID/ECR Repo/user-service:$COMMIT_HASH"
+            }
+        }
+
     }
     post {
         always {
