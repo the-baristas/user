@@ -32,7 +32,7 @@ pipeline {
          }
          stage('Await Quality Gateway') {
              steps {
-                 waitForQualityGate abortPipeline: true
+                 //waitForQualityGate abortPipeline: true
              }
          }
     }
