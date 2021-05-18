@@ -21,11 +21,11 @@ pipeline {
                  }
              }
          }
-        // stage('Await Quality Gateway') {
-           //  steps {
-                 //waitForQualityGate abortPipeline: true
-            // }
-        // }
+         stage('Await Quality Gateway') {
+             steps {
+                 waitForQualityGate abortPipeline: true
+             }
+         }
         stage('Docker Build') {
             steps {
                 echo 'Deploying....'
