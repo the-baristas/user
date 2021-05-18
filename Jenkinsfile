@@ -16,7 +16,7 @@ pipeline {
         }
        // stage('Docker Build') {
        //     steps {
-                echo 'Deploying....'
+       //         echo 'Deploying....'
                 // sh "aws ecr ........."
        //         sh "docker build --tag user-service:$COMMIT_HASH ."
                 // sh "docker tag user-service:$COMMIT_HASH $AWS_ID/ECR Repo/user-service:$COMMIT_HASH"
