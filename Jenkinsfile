@@ -16,7 +16,7 @@ pipeline {
         }
        // stage('Docker Build') {
        //     steps {
-                echo 'Deploying....'
+       //         echo 'Deploying....'
                 // sh "aws ecr ........."
        //         sh "docker build --tag user-service:$COMMIT_HASH ."
                 // sh "docker tag user-service:$COMMIT_HASH $AWS_ID/ECR Repo/user-service:$COMMIT_HASH"
@@ -25,7 +25,7 @@ pipeline {
        // }
          stage('Code Analysis: Sonarqube') {
              steps {
-                 withSonarQubeEnv('SQ') {
+                 withSonarQubeEnv('SonarQube') {
                      sh 'mvn sonar:sonar -Dsonar.login=fe2fd4de999e222d92ab830601a6d0e663cc1cbe'
                  }
              }
