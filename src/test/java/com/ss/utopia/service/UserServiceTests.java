@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.google.common.util.concurrent.Service;
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
@@ -47,7 +48,7 @@ class UserServiceTests {
 		user2.setPhone("8195678900");
 		users.add(user1);
 		users.add(user2);
-		
+	
 		PageRequest pageRequest = PageRequest.of(0, 2);
 		Page<User> userPage = new PageImpl<User>(users);
 		
@@ -66,13 +67,12 @@ class UserServiceTests {
 
 		User userFromDB = userService.getUserById(1);
 
-		assertThat(userFromDB.getUserId(), is(user.get().getUserId()));
+		assertTrue(userFromDB.equals(user.get()));
 	}
 	
 	@Test
 	void testGetUserByIdThrowsResponseStatusException() {
-		Assertions.assertThrows(ResponseStatusException.class, () -> {
-			userService.getUserById(23);});
+		Assertions.assertThrows(ResponseStatusException.class, () -> {userService.getUserById(23);});
 	}
 	
 	//Test get by email
@@ -181,6 +181,36 @@ class UserServiceTests {
 	void testDeleteResponseStatusExceptionException() {
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.deleteUserById(23);});
+	}
+	
+	@Test
+	void testCheckNoDuplicateFields() {
+		List<User> users = new ArrayList<User>();
+		User user1 = makeUser();
+		User user2 = makeUser();
+		user2.setUserId(2);
+		user2.setEmail("bb@gmail.com");
+		user2.setUsername("username4567");
+		user2.setPhone("8195678900");
+		users.add(user1);
+		users.add(user2);
+		
+		User newUser = makeUser();
+		newUser.setUserId(3);
+		
+		when(dao.findAll()).thenReturn(users);
+		
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
+			userService.addUser(newUser);});
+		
+		newUser.setEmail("unique@unique.uni");
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
+			userService.addUser(newUser);});
+		
+		newUser.setUsername("veryunique");
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
+			userService.addUser(newUser);});
+		
 	}
 	
 	private User makeUser() {

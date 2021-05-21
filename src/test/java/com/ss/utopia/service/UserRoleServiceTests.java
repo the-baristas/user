@@ -32,7 +32,7 @@ public class UserRoleServiceTests {
 		
 		UserRole roleFromDB = userRoleService.getUserRoleByRoleName(role.getRoleName());
 		
-		assertThat(roleFromDB.getRoleName(), is(role.getRoleName()));
+		assertThat(roleFromDB, is(role));
 	}
 	
 }

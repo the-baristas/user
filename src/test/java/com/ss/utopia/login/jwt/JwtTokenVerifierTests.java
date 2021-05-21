@@ -1,8 +1,6 @@
-package com.ss.utopia.log.jwt;
+package com.ss.utopia.login.jwt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -10,9 +8,6 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import com.ss.utopia.login.jwt.JwtTokenVerifier;
-import com.ss.utopia.login.jwt.JwtUtils;
 
 import io.jsonwebtoken.Jwts;
 

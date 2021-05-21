@@ -1,8 +1,8 @@
 package com.ss.utopia.controller;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.ss.utopia.converter.UserConverter;
 import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.login.jwt.JwtTokenVerifier;
@@ -87,9 +86,8 @@ public class UserController {
 	
 
 	@PostMapping("")
-	public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto, UriComponentsBuilder builder)
+	public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDto, UriComponentsBuilder builder)
 			throws ResponseStatusException {
-		
 		User user = dtoToEntity(userDto);		
 		UserDTO addedUser = entityToDto(userService.addUser(user));
 		return ResponseEntity.status(HttpStatus.CREATED)
@@ -97,7 +95,10 @@ public class UserController {
 	}
 	
 	@PutMapping("{userId}")
-	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto) throws ResponseStatusException {
+	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto,
+			@RequestHeader Map<String,String> header) throws ResponseStatusException {
+		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
+		
 		User user = dtoToEntity(userDto);
 		userService.updateUser(userId, user);
 		return new ResponseEntity<String>(HttpStatus.OK);
