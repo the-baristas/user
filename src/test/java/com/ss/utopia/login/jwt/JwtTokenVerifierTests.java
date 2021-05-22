@@ -31,14 +31,14 @@ class JwtTokenVerifierTests {
 	
 	@Test
 	void testGetUsernameFromToken() {
-		assertEquals(tokenVerifier.getUsernameFromToken(adminToken), "admin");
-		assertEquals(tokenVerifier.getUsernameFromToken(customerToken), "customer");
+		assertEquals("admin", tokenVerifier.getUsernameFromToken(adminToken));
+		assertEquals("customer", tokenVerifier.getUsernameFromToken(customerToken));
 	}
 	
 	@Test
 	void testGetRoleFromToken() {
-		assertEquals(tokenVerifier.getRoleFromToken(adminToken), "ROLE_ADMIN");
-		assertEquals(tokenVerifier.getRoleFromToken(customerToken), "ROLE_CUSTOMER");
+		assertEquals("ROLE_ADMIN", tokenVerifier.getRoleFromToken(adminToken));
+		assertEquals("ROLE_CUSTOMER", tokenVerifier.getRoleFromToken(customerToken));
 	}
 
 }

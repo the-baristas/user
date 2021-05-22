@@ -21,7 +21,7 @@ public class UtopiaUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		List<User> users = userDao.findByUsername(username);
 		
-		if(users.size() == 0)
+		if(users.isEmpty())
 			throw new UsernameNotFoundException("Username does not exist: " + username);
 
 		return new UtopiaUserDetails(users.get(0));

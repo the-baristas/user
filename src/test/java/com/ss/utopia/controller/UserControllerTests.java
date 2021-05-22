@@ -1,7 +1,7 @@
 package com.ss.utopia.controller;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,7 +21,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +37,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,13 +73,13 @@ class UserControllerTests {
 	private WebTestClient webTestClient;
 	
 	@BeforeEach
-    public void setUp() {
+    void setUp() {
         webTestClient = MockMvcWebTestClient.bindTo(mockMvc).build();
     }
 
 	@Test
-	public void controllerLoads() throws Exception {
-		assertTrue(controller != null);
+	void controllerLoads() throws Exception {
+		assertNotNull(controller);
 	}
 
 	@Test
@@ -239,7 +236,7 @@ class UserControllerTests {
 	}
 
 	@Test
-	public void testAddUser() throws Exception {
+	void testAddUser() throws Exception {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
 		userDto.setPassword("password");
@@ -253,7 +250,7 @@ class UserControllerTests {
 	}
  
 	@Test
-	public void testUpdateUser() throws Exception {
+	void testUpdateUser() throws Exception {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
 		
@@ -274,7 +271,7 @@ class UserControllerTests {
 	}
 
 	@Test
-	public void testDeleteUser() throws Exception {
+	void testDeleteUser() throws Exception {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
 		

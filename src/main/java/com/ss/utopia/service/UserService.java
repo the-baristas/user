@@ -55,7 +55,6 @@ public class UserService {
 	}
 
 	public User addUser(User user) throws ResponseStatusException {
-		//checkUserFieldsFilled(user);
 
 		Utils.checkEmailValid(user.getEmail());
 		Utils.checkPhoneNumberValid(user.getPhone());
@@ -86,7 +85,6 @@ public class UserService {
 	public void deleteUserById(Integer userId) throws ResponseStatusException {
 		userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
-		;
 		userDAO.deleteById(userId);
 	}
 
