@@ -55,7 +55,6 @@ public class UserService {
 	}
 
 	public User addUser(User user) throws ResponseStatusException {
-		//checkUserFieldsFilled(user);
 
 		Utils.checkEmailValid(user.getEmail());
 		Utils.checkPhoneNumberValid(user.getPhone());
@@ -71,13 +70,13 @@ public class UserService {
 		User oldUserInfo = userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 
-		if (newUserInfo.getEmail() != null)
-			Utils.checkEmailValid(newUserInfo.getEmail());
+		Utils.checkEmailValid(newUserInfo.getEmail());
+		
 		if (newUserInfo.getPassword() != null)
 			newUserInfo.setPassword(Utils.passwordEncoder().encode(newUserInfo.getPassword()));
-
 		else
 			newUserInfo.setPassword(oldUserInfo.getPassword());
+		
 		newUserInfo.setUserId(userId);
 		checkNoDuplicateFields(newUserInfo);
 		return userDAO.save(newUserInfo);
@@ -86,7 +85,6 @@ public class UserService {
 	public void deleteUserById(Integer userId) throws ResponseStatusException {
 		userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
-		;
 		userDAO.deleteById(userId);
 	}
 
@@ -107,19 +105,5 @@ public class UserService {
 
 	}
 
-	private void checkUserFieldsFilled(User user) {
-		if (user.getGivenName() == null || user.getGivenName().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a first name.");
-		if (user.getFamilyName() == null || user.getFamilyName().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a last name.");
-		if (user.getEmail() == null || user.getEmail().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include an email.");
-		if (user.getUsername() == null || user.getUsername().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a username.");
-		if (user.getPassword() == null || user.getPassword().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a password.");
-		if (user.getPhone() == null || user.getPhone().equals(""))
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Must include a phone number.");
-	}
 
 }

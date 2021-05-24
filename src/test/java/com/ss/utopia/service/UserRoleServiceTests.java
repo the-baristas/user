@@ -2,7 +2,6 @@ package com.ss.utopia.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,7 @@ import com.ss.utopia.entity.UserRole;
 
 @ExtendWith(MockitoExtension.class)
 
-public class UserRoleServiceTests {
+class UserRoleServiceTests {
 
 	@InjectMocks
 	private UserRoleService userRoleService;
@@ -32,7 +31,7 @@ public class UserRoleServiceTests {
 		
 		UserRole roleFromDB = userRoleService.getUserRoleByRoleName(role.getRoleName());
 		
-		assertThat(roleFromDB.getRoleName(), is(role.getRoleName()));
+		assertThat(roleFromDB, is(role));
 	}
 	
 }

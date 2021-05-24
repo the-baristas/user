@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
@@ -48,9 +47,6 @@ public class User {
 	
 	@Column(name = "phone", unique = true)
 	private String phone;
-	
-//	@Column(name = "role")
-//	private int role;
 	
 	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "role", referencedColumnName = "id", insertable = false, updatable = true)
@@ -129,18 +125,6 @@ public class User {
 
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
-	}
-	
-//	public String getRoleName() {
-//		return role.getRoleName();
-//	}
-
-
-	@Override
-	public String toString() {
-		return "User [userId=" + userId + ", givenName=" + givenName + ", familyName=" + familyName + ", username="
-				+ username + ", email=" + email + ", password=" + password + ", phone=" + phone + ", role=" + role.toString()
-				+ ", isActive=" + isActive + "]";
 	}
 
 	@Override

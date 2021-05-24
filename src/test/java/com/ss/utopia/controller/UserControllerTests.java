@@ -1,7 +1,7 @@
 package com.ss.utopia.controller;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,12 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springdoc.core.converters.models.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -37,12 +34,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ss.utopia.converter.UserConverter;
 import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
@@ -72,17 +69,23 @@ class UserControllerTests {
 	
 	@MockBean
 	private UtopiaUserDetailsService userDetailsService;
+	
+	private WebTestClient webTestClient;
+	
+	@BeforeEach
+    void setUp() {
+        webTestClient = MockMvcWebTestClient.bindTo(mockMvc).build();
+    }
 
 	@Test
-	public void controllerLoads() throws Exception {
-		assertTrue(controller != null);
+	void controllerLoads() throws Exception {
+		assertNotNull(controller);
 	}
 
 	@Test
 	void testGetUserById() throws Exception {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
-		UserRole role = new UserRole(2, "ROLE_ADMIN");
 
 		//Build tokens
 		String adminToken = Jwts.builder().setSubject("someUsername23")
@@ -108,7 +111,6 @@ class UserControllerTests {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
 		userDto.setRole("ROLE_CUSTOMER");
-		UserRole role = new UserRole(2, "ROLE_CUSTOMER");
 
 		//Build tokens
 		String adminToken = Jwts.builder().setSubject("differentUsername")
@@ -140,6 +142,30 @@ class UserControllerTests {
 		when(userService.getUserByEmail("username@email.org")).thenReturn(user);
 
 		mockMvc.perform(get("/users/email/username@email.org").header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.userId").value(userDto.getUserId()))
+				.andExpect(jsonPath("$.givenName").value(userDto.getGivenName()))
+				.andExpect(jsonPath("$.familyName").value(userDto.getFamilyName()))
+				.andExpect(jsonPath("$.email").value(userDto.getEmail()))
+				.andExpect(jsonPath("$.role").value(userDto.getRole()))
+				.andExpect(jsonPath("$.phone").value(userDto.getPhone())).andExpect(status().isOk());
+	}
+	
+	@Test
+	void testGetUserByUsername() throws Exception {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		
+		//Build tokens
+		String adminToken = Jwts.builder().setSubject("someUsername23")
+			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+			.setIssuedAt(new Date())
+			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
+			.signWith(JwtUtils.getSecretKey())
+			.compact();
+
+		when(userService.getUserByUsername("someUsername23")).thenReturn(user);
+
+		mockMvc.perform(get("/users/username/someUsername23").header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.userId").value(userDto.getUserId()))
 				.andExpect(jsonPath("$.givenName").value(userDto.getGivenName()))
 				.andExpect(jsonPath("$.familyName").value(userDto.getFamilyName()))
@@ -210,36 +236,42 @@ class UserControllerTests {
 	}
 
 	@Test
-	public void testAddUser() throws Exception {
+	void testAddUser() throws Exception {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		userDto.setPassword("password");
+		
+		when(userService.addUser(controller.dtoToEntity(userDto))).thenReturn(user);
+		
+	    webTestClient.post().uri("/users")
+        	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true}")
+        	.exchange().expectStatus().isCreated().expectHeader()
+        	.contentType(MediaType.APPLICATION_JSON);
+	}
+ 
+	@Test
+	void testUpdateUser() throws Exception {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
 		
-		when(userService.addUser(controller.dtoToEntity(userDto))).thenReturn(user);
-
-		mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(controller.dtoToEntity(userDto))))
-				.andExpect(MockMvcResultMatchers.status().isCreated())
-				.andExpect(MockMvcResultMatchers.header().exists("Location"))
-				.andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsString("1")));
-
-		verify(userService).addUser(UserConverter.dtoToEntity(userDto));
-	}
-
-	@Test
-	public void testUpdateUser() throws Exception {
-		User user = makeUser();
-		UserDTO userDto = makeUserDTO();
+		//Build tokens
+		String adminToken = Jwts.builder().setSubject("someUsername23")
+			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+			.setIssuedAt(new Date())
+			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
+			.signWith(JwtUtils.getSecretKey())
+			.compact();
 
 		when(userService.getUserById(userDto.getUserId())).thenReturn(user);
 
-		when(userService.updateUser(userDto.getUserId(), controller.dtoToEntity(userDto))).thenReturn(UserConverter.dtoToEntity(userDto));
-		mockMvc.perform(put("/users/{userId}", userDto.getUserId(), userDto).contentType(MediaType.APPLICATION_JSON)
+		when(userService.updateUser(userDto.getUserId(), controller.dtoToEntity(userDto))).thenReturn(user);
+		mockMvc.perform(put("/users/{userId}", userDto.getUserId(), userDto).header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON)
 				.content(new ObjectMapper().writeValueAsString(userDto))).andExpect(status().isOk());
 
 	}
 
 	@Test
-	public void testDeleteUser() throws Exception {
+	void testDeleteUser() throws Exception {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
 		

@@ -13,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class Utils {
 	
+	private Utils() {}
+	
 	public static PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}

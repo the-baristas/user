@@ -1,45 +1,39 @@
 package com.ss.utopia.dto;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.AccessLevel;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 
 public class UserDTO {
 	
-	@Positive
+	
 	private int userId;
-	@NotBlank
+	@NotBlank(message ="Must include a first name.")
 	private String givenName;
-	@NotBlank
+	@NotBlank(message = "Must include a last name.")
 	private String familyName;
-	@NotBlank
+	@NotBlank(message = "Must include a username.")
 	private String username;
-	@Email
-	@NotNull
+
+	@NotNull(message = "Must include a email.")
 	private String email;
-	@NotBlank
+	@NotBlank(message = "Must include a password.")
 	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
-	@NotBlank
+	@NotBlank(message = "Must include a phone number.")
 	private String phone;
-	@NotNull
+	
 	private String role;
-	@NotNull
+	
 	private boolean isActive;
 	
 	public int getUserId() {
