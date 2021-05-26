@@ -83,9 +83,9 @@ public class UserService {
 	}
 
 	public void deleteUserById(Integer userId) throws ResponseStatusException {
-		userDAO.findById(userId).orElseThrow(
+		User deleted = userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
-		userDAO.deleteById(userId);
+		userDAO.deleteById(deleted.getUserId());
 	}
 
 	private void checkNoDuplicateFields(User newUser) throws ResponseStatusException {
