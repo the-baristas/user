@@ -39,7 +39,7 @@ pipeline {
     post {
         always {
             sh 'mvn clean'
-            sh 'docker image prune'
+            sh 'docker system prune -f'
         }
     }
 }
