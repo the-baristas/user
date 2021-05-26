@@ -31,7 +31,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception{
-		auth.userDetailsService(utopiaUserDetailsService);
+		auth.userDetailsService(utopiaUserDetailsService).passwordEncoder(passwordEncoder());
 	}
 	
 	@Override
