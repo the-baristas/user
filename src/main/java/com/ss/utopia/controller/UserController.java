@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -127,6 +128,7 @@ public class UserController {
 	}
 	
 	public void checkUsernameRequestMatchesResponse(Map<String, String> header, String responseUsername) {
+		System.out.println(header);
 		JwtTokenVerifier tokenVerifier = new JwtTokenVerifier();
 		String username = tokenVerifier.getUsernameFromToken(header.get("authorization"));
 		String role = new JwtTokenVerifier().getRoleFromToken(header.get("authorization"));

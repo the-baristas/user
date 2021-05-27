@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         COMMIT_HASH = "${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"
+        AWS_ID = '135316859264'
     }
     stages {
         stage('Clean and test target') {
@@ -21,18 +22,18 @@ pipeline {
                 }
             }
         }
-        stage('Quality gate') {
-            steps {
-                waitForQualityGate abortPipeline: true
-            }
-        }
+  //      stage('Quality gate') {
+ //           steps {
+//                waitForQualityGate abortPipeline: true
+//            }
+//        }
         stage('Docker Build') {
             steps {
                 echo 'Deploying....'
-                // sh "aws ecr ........."
+                 //sh "aws ecr ........."
                 sh "docker build --tag user-service:$COMMIT_HASH ."
-                // sh "docker tag MicroServiceName:$COMMIT_HASH $AWS_ID/ECR Repo/MicroServiceName:$COMMIT_HASH"
-                // sh "docker push $AWS_ID/ECR Repo/MicroServiceName:$COMMIT_HASH"
+                 sh "docker tag user-service:$COMMIT_HASH $AWS_ID.dkr.ecr.us-east-2.amazonaws.com/user-service:$COMMIT_HASH"
+                 sh "docker push $AWS_ID.dkr.ecr.us-east-2.amazonaws.com/user-service:$COMMIT_HASH"
             }
         }
     }
