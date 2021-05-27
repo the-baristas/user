@@ -30,8 +30,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo 'Deploying....'
-                sh "aws ecr get-login-password --region region | docker login --username AWS --password-stdin 135316859264.dkr.ecr.us-east-2.amazonaws.com"
-                sh "docker build --tag user-service:$COMMIT_HASH ."
+                sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 135316859264.dkr.ecr.us-east-2.amazonaws.com"
+                sh "docker build -t user-service:$COMMIT_HASH ."
                  sh "docker tag user-service:$COMMIT_HASH 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:$COMMIT_HASH"
                  sh "docker push 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:$COMMIT_HASH"
             }
