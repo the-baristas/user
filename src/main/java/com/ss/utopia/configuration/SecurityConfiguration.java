@@ -46,6 +46,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.addFilterAfter(new JwtTokenVerifier(), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
+		.antMatchers(HttpMethod.GET, "/users/health").permitAll()
 		.anyRequest().authenticated();
 		
 	}

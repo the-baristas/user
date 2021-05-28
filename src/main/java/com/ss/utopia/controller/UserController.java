@@ -41,6 +41,11 @@ public class UserController {
 	@Autowired
 	private UserRoleService userRoleService;
 	
+	@GetMapping("health")
+	public String healthCheck() {
+		return "ye";
+	}
+	
 	@GetMapping("")
 	public Page<UserDTO> getAllUsers(@RequestParam(name="page") Integer page, @RequestParam(name="size") Integer size){
 		Page<User> userPage = userService.getAllUsers(page, size);
