@@ -4,7 +4,7 @@ Description: ECS Base Template
 Parameters:
   ApplicationEnvironment:
     Type: String
-    Default: user-environment
+    Default: dev
   ApplicationName:
     Type: String
     Default: user-service
@@ -73,11 +73,11 @@ Resources:
           Image: !Ref ECRRepositoryUri # This gets passed as param from ecs.json generated in buildspec
           PortMappings:
             - ContainerPort: 8081
-          Secrets:
-            - Name: DB_USERNAME
-              ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:username}}'
-            - Name: DB_PASSWORD
-              ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:password}}'
+          # Secrets:
+          #   - Name: DB_USERNAME
+          #     ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:username}}'
+          #   - Name: DB_PASSWORD
+          #     ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:password}}'
           Environment:
             - Name: APPLICATION_NAME
               Value: !Sub ${ApplicationName}
