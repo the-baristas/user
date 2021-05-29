@@ -10,7 +10,7 @@ Parameters:
     Default: user-service
   ECRRepositoryUri:
     Type: String
-    Default: 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service
+    Default: 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:58183ac
     Description: Full Uri for consumer docker image to run in container
 Resources:
   # Role for ECS container
