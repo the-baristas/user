@@ -4,7 +4,7 @@ Description: ECS Base Template
 Parameters:
   ApplicationEnvironment:
     Type: String
-    Default: dev
+    Default: user-environment
   ApplicationName:
     Type: String
     Default: user-service
@@ -51,7 +51,7 @@ Resources:
           Subnets:
             - !Sub '{{resolve:secretsmanager:private-subnet:SecretString:private-subnet}}'
           SecurityGroups:
-            - !Sub '{{resolve:secretsmanager:vpc-security-group::SecretString:vpc-security-group}}'
+            - !Sub '{{resolve:secretsmanager:vpc-security-group:SecretString:vpc-security-group}}'
       LoadBalancers:
         - ContainerName: !Ref ApplicationName
           ContainerPort: 8081
