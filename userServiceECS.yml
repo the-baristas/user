@@ -35,10 +35,10 @@ Resources:
   # Fargate ECS Service
   MicroService:
     Type: AWS::ECS::Service
-    #DependsOn: ApiListenerRule
+   # DependsOn: ApiListenerRule
     Properties:
       ServiceName: !Join ['-', [!Ref ApplicationName, !Ref ApplicationEnvironment]]
-      Cluster: !Sub '{{resolve:secretsmanager:ecs-cluster-name:SecretString:ecs-cluster-name}}'
+      Cluster: '{{resolve:secretsmanager:ecs-cluster-name:SecretString:ecs-cluster-name}}'
       TaskDefinition: !Ref TaskDefinition
       DeploymentConfiguration:
         MinimumHealthyPercent: 100
@@ -49,9 +49,9 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Sub '{{resolve:secretsmanager:private-subnet:SecretString:private-subnet}}'
+            - '{{resolve:secretsmanager:private-subnet:SecretString:private-subnet}}'
           SecurityGroups:
-            - !Sub '{{resolve:secretsmanager:vpc-security-group:SecretString:vpc-security-group}}'
+            - '{{resolve:secretsmanager:vpc-security-group:SecretString:vpc-security-group}}'
       LoadBalancers:
         - ContainerName: !Ref ApplicationName
           ContainerPort: 8081
@@ -100,7 +100,7 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
               awslogs-create-group: 'true'
-  # Optional
+
   # TargetGroup:
   #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
   #   Properties:
