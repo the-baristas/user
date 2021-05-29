@@ -49,12 +49,12 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - '{{resolve:secretsmanager:private-subnet:SecretString:private-subnet}}'
+            - '{{resolve:secretsmanager:public-subnet:SecretString:public-subnet}}'
           SecurityGroups:
             - '{{resolve:secretsmanager:vpc-security-group:SecretString:vpc-security-group}}'
-      LoadBalancers:
-        - ContainerName: !Ref ApplicationName
-          ContainerPort: 8081
+      # LoadBalancers:
+      #   - ContainerName: !Ref ApplicationName
+      #     ContainerPort: 8081
           #TargetGroupArn: !Ref TargetGroup
   # Fargate Task Definition
   TaskDefinition:
