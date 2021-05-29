@@ -85,12 +85,12 @@ Resources:
               Value: !Ref ApplicationEnvironment
             - Name: PORT
               Value: '8081'
-            - Name: DB_HOST_URL
-              Value: !Join
-                - ''
-                - - !Sub 'jdbc:mysql://{{resolve:secretsmanager:mysql:SecretString:host}}'
-                  - !Sub ':{{resolve:secretsmanager:mysql:SecretString:port}}'
-                  - !Sub '/{{resolve:secretsmanager:mysql:SecretString:dbname}}'
+            # - Name: DB_HOST_URL
+            #   Value: !Join
+            #     - ''
+            #     - - !Sub 'jdbc:mysql://{{resolve:secretsmanager:mysql:SecretString:host}}'
+            #       - !Sub ':{{resolve:secretsmanager:mysql:SecretString:port}}'
+            #       - !Sub '/{{resolve:secretsmanager:mysql:SecretString:dbname}}'
           Essential: true
           Memory: 1024
           LogConfiguration:
