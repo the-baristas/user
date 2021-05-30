@@ -75,9 +75,9 @@ Resources:
             - ContainerPort: 8081
           Secrets:
             - Name: DB_USERNAME
-              ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:username}}'
+              ValueFrom: !Sub '{{resolve:secretsmanager:mysql-username:SecretString:username}}'
             - Name: DB_PASSWORD
-              ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:password}}'
+              ValueFrom: !Sub '{{resolve:secretsmanager:mysql-password:SecretString:password}}'
           Environment:
             - Name: APPLICATION_NAME
               Value: !Sub ${ApplicationName}
