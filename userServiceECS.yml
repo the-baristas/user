@@ -85,6 +85,8 @@ Resources:
               Value: !Ref ApplicationEnvironment
             - Name: PORT
               Value: '8081'
+            - Name: EUERKA_URL
+              Value: http://52.15.232.97:8761/eureka
             # - Name: DB_HOST_URL
             #   Value: !Join
             #     - ''
