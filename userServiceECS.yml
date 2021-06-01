@@ -55,7 +55,7 @@ Resources:
       LoadBalancers:
         - ContainerName: !Ref ApplicationName
           ContainerPort: 8081
-          TargetGroupArn: arn:aws:elasticloadbalancing:us-east-2:135316859264:targetgroup/utopia-target-group/a040b28dd59b7a6c
+          TargetGroupArn: arn:aws:elasticloadbalancing:us-east-2:135316859264:targetgroup/user-service-target-group/34a15eac65941597
   # Fargate Task Definition
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
