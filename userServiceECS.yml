@@ -53,10 +53,7 @@ Resources:
           SecurityGroups:
             - '{{resolve:secretsmanager:vpc-security-group:SecretString:vpc-security-group}}'
       LoadBalancers:
-        - ContainerName: !Join 
-            - '-'
-            - - !Ref ApplicationName
-              - container
+        - ContainerName: !Ref ApplicationName
           ContainerPort: 8091
           TargetGroupArn: arn:aws:elasticloadbalancing:us-east-2:135316859264:targetgroup/user-service-target-group/db1fe292a44ddc9c
   # Fargate Task Definition
