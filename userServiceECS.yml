@@ -35,7 +35,7 @@ Resources:
   # Fargate ECS Service
   MicroService:
     Type: AWS::ECS::Service
-   #DependsOn: ApiListenerRule
+    DependsOn: ApiListenerRule
     Properties:
       ServiceName: !Join ['-', [!Ref ApplicationName, !Ref ApplicationEnvironment]]
       Cluster: '{{resolve:secretsmanager:ecs-cluster-name:SecretString:ecs-cluster-name}}'
@@ -55,7 +55,7 @@ Resources:
       LoadBalancers:
         - ContainerName: !Ref ApplicationName
           ContainerPort: 8081
-          TargetGroupArn: arn:aws:elasticloadbalancing:us-east-2:135316859264:targetgroup/user-service-target-group/db1fe292a44ddc9c
+          TargetGroupArn: !Ref TargetGroup
   # Fargate Task Definition
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
@@ -102,35 +102,32 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
               awslogs-create-group: 'true'
-
-  # TargetGroup:
-  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #   Properties:
-  #     HealthCheckIntervalSeconds: 60
-  #     HealthCheckPath: '/users/health'
-  #     HealthCheckTimeoutSeconds: 5
-  #     HealthCheckPort: '8081'
-  #     UnhealthyThresholdCount: 2
-  #     HealthyThresholdCount: 2
-  #     Name: !Sub '${ApplicationName}-${ApplicationEnvironment}-tg'
-  #     Port: 8081
-  #     Protocol: HTTP
-  #     TargetGroupAttributes:
-  #       - Key: deregistration_delay.timeout_seconds
-  #         Value: '60'
-  #     TargetType: ip
-  #     VpcId: !Sub '{{resolve:secretsmanager:vpc-id:SecretString:vpc-id}}'
-  # ApiListenerRule:
-  #   Type: AWS::ElasticLoadBalancingV2::ListenerRule
-  #   Properties:
-  #     Conditions:
-  #       - Field: path-pattern
-  #         Values:
-  #           - /users/*
-  #           - /users*
-  #           - /login*
-  #     Actions:
-  #       - Type: forward
-  #         TargetGroupArn: !Ref TargetGroup
-  #     ListenerArn: !Sub '{{resolve:secretsmanager:listener-arn:SecretString:listener-arn}}'
-  #     Priority: 10
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: '/users/health'
+      HealthCheckTimeoutSeconds: 5
+      HealthCheckPort: '8081'
+      UnhealthyThresholdCount: 2
+      HealthyThresholdCount: 2
+      Name: !Sub '${ApplicationName}-${ApplicationEnvironment}-tg'
+      Port: 8081
+      Protocol: HTTP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '60'
+      TargetType: ip
+      VpcId: !Sub '{{resolve:secretsmanager:vpc-id:SecretString:vpc-id}}'
+  ApiListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /*
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      ListenerArn: !Sub '{{resolve:secretsmanager:listener-arn:SecretString:listener-arn}}'
+      Priority: 10
