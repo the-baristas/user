@@ -2,8 +2,8 @@ pipeline {
     agent any
     environment {
         COMMIT_HASH = "${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"
-        SERVICE_NAME = "booking-service"
-        ECR_REGISTRY_URI = "135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:latest"
+        SERVICE_NAME = "user-service"
+        ECR_REGISTRY_URI = "135316859264.dkr.ecr.us-east-2.amazonaws.com"
     }
     stages {
         stage('Clean and test target') {
