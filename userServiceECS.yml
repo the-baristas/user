@@ -118,7 +118,7 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value: '60'
       TargetType: ip
-      VpcId: !Sub '{{resolve:secretsmanager:vpc-id:SecretString:vpc-id}}'
+      VpcId: '{{resolve:secretsmanager:vpc-id:SecretString:vpc-id}}'
   ApiListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
@@ -129,5 +129,5 @@ Resources:
       Actions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
-      ListenerArn: !Sub '{{resolve:secretsmanager:listener-arn:SecretString:listener-arn}}'
+      ListenerArn: '{{resolve:secretsmanager:listener-arn:SecretString:user-service-listener-arn}}'
       Priority: 10
