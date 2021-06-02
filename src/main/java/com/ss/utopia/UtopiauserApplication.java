@@ -28,7 +28,7 @@ public class UtopiauserApplication {
             public void addCorsMappings(CorsRegistry registry) {
                 	registry.addMapping("/**")
 		               .allowedOrigins("*")
-		               .allowedMethods("GET", "POST", "PUT", "DELETE")
+		               .allowedMethods("*")
 			           .allowedHeaders("*")
 		               .exposedHeaders("*");
             }
