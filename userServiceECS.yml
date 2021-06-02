@@ -107,7 +107,7 @@ Resources:
     Properties:
       HealthCheckIntervalSeconds: 60
       HealthCheckPath: '/users/health'
-      HealthCheckTimeoutSeconds: 60
+      HealthCheckTimeoutSeconds: 59
       HealthCheckPort: '8081'
       UnhealthyThresholdCount: 2
       HealthyThresholdCount: 2
