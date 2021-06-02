@@ -2,7 +2,8 @@ pipeline {
     agent any
     environment {
         COMMIT_HASH = "${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"
-        AWS_ID = "135316859264"
+        SERVICE_NAME = "booking-service"
+        ECR_REGISTRY_URI = "135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:latest"
     }
     stages {
         stage('Clean and test target') {
@@ -31,16 +32,15 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 135316859264.dkr.ecr.us-east-2.amazonaws.com"
-                sh "docker build -t user-service:latest ."
-                 sh "docker tag user-service:latest 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:latest"
-                 sh "docker push 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:latest"
-            }
+                sh "docker build -t ${SERVICE_NAME}:${COMMIT_HASH} ."
+                sh "docker tag ${SERVICE_NAME}:${COMMIT_HASH} ${ECR_REGISTRY_URI}/${SERVICE_NAME}:${COMMIT_HASH}"
+                sh "docker push ${ECR_REGISTRY_URI}/${SERVICE_NAME}:${COMMIT_HASH}"            }
         }
             stage('Deploy') {
               steps {
                 
                 echo 'Deploying cloudformation..'
-                sh "aws cloudformation deploy --stack-name UserService --template-file ./userServiceECS.yml --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --region us-east-2"
+                sh "aws cloudformation deploy --stack-name ${SERVICE_NAME}-stack --template-file ./userServiceECS.yml --parameter-overrides ApplicationName=${SERVICE_NAME} EcrImageUri=${ECR_REGISTRY_URI}/${SERVICE_NAME}:${COMMIT_HASH} --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --region us-east-2"
               }
             }
     }

@@ -30,7 +30,7 @@ public class UtopiauserApplication {
 		               .allowedOrigins("*")
 		               .allowedMethods("GET", "POST", "PUT", "DELETE")
 			           .allowedHeaders("*")
-		               .exposedHeaders("Authorization", "Access-Control-Allow-Origin", "Allow-Origin");
+		               .exposedHeaders("*");
             }
         };
     }
