@@ -33,7 +33,7 @@ import com.ss.utopia.service.UserService;
 
 @RestController
 @RequestMapping("/users")
-@CrossOrigin
+@CrossOrigin(origins = "*", exposedHeaders = {"Authorization", "Access-Control-Allow-Origin"})
 public class UserController {
 
 	@Autowired
