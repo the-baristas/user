@@ -4,7 +4,7 @@ Description: ECS Base Template
 Parameters:
   ApplicationEnvironment:
     Type: String
-    Default: user-environment
+    Default: dev
   ApplicationName:
     Type: String
     Default: user-service
@@ -107,7 +107,7 @@ Resources:
     Properties:
       HealthCheckIntervalSeconds: 60
       HealthCheckPath: '/users/health'
-      HealthCheckTimeoutSeconds: 5
+      HealthCheckTimeoutSeconds: 60
       HealthCheckPort: '8081'
       UnhealthyThresholdCount: 2
       HealthyThresholdCount: 2
