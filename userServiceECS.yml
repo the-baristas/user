@@ -70,7 +70,7 @@ Resources:
       TaskRoleArn: !Ref ContainerExecutionRole
       ContainerDefinitions:
         - Name: !Ref ApplicationName
-          Image: !Ref ECRRepositoryUri # This gets passed as param from ecs.json generated in buildspec
+          Image: !Ref EcrImageUri # This gets passed as param from ecs.json generated in buildspec
           PortMappings:
             - ContainerPort: 8081
           # Secrets:
