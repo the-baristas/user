@@ -1,3 +1,0 @@
-Anthony Sirimarco - 4/22/2021 - Added user authentication with JWT tokens.
-
-Anthony Sirimarco - 5/5/2021 - Added pagination to getAllUsers and search by phone number.
