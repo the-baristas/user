@@ -52,6 +52,15 @@ public class UserController {
 		return userPage.map(user -> {return entityToDto(user);});
 	}
 	
+	@GetMapping("search")
+	public Page<UserDTO> findUsersBySearchTerm(
+			@RequestParam("term") String searchTerm,
+            @RequestParam("page") Integer page,
+            @RequestParam("size") Integer size){
+        Page<User> userPage = userService.findAllUserBySearchTerm(searchTerm, page, size);
+        return userPage.map(user -> {return entityToDto(user);});
+            }
+	
 
 	@GetMapping("{userId}")
 	public UserDTO getUserById(@PathVariable("userId") Integer userId,

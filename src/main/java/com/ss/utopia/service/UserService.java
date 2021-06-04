@@ -27,6 +27,10 @@ public class UserService {
 	public Page<User> getAllUsers(Integer page, Integer size){
 		return userDAO.findAll(PageRequest.of(page, size));
 	}
+	
+	public Page<User> findAllUserBySearchTerm(String searchTerm, Integer page, Integer size){
+		return userDAO.findDistinctBySearchTerm(searchTerm, PageRequest.of(page, size));
+	}
 
 	public User getUserByEmail(String email) throws ResponseStatusException {
 		Utils.checkEmailValid(email);

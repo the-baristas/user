@@ -8,7 +8,7 @@ Parameters:
   ApplicationName:
     Type: String
     Default: user-service
-  ECRRepositoryUri:
+  EcrImageUri:
     Type: String
     Default: 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:latest
     Description: Full Uri for consumer docker image to run in container
