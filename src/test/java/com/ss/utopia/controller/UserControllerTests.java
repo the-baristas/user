@@ -33,6 +33,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
@@ -51,6 +52,7 @@ import com.ss.utopia.service.UserService;
 import io.jsonwebtoken.Jwts;
 
 @ExtendWith(SpringExtension.class)
+@WithMockUser(authorities = { "ROLE_ADMIN" })
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters=false)
 class UserControllerTests {
