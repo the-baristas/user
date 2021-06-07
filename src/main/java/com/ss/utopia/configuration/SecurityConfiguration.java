@@ -1,6 +1,7 @@
 package com.ss.utopia.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,8 +25,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	UtopiaUserDetailsService utopiaUserDetailsService;
-
-	
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception{
@@ -41,7 +40,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.addFilter(new JwtUserAuthenticationFilter(authenticationManager()))
 		.addFilterAfter(new JwtTokenVerifier(), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
-.antMatchers("*").permitAll()
+		.antMatchers(HttpMethod.POST, "/users").permitAll()
+		.antMatchers(HttpMethod.GET, "/users/health").permitAll()
 		.anyRequest().authenticated();
 		
 	}

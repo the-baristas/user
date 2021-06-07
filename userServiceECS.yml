@@ -70,14 +70,16 @@ Resources:
       TaskRoleArn: !Ref ContainerExecutionRole
       ContainerDefinitions:
         - Name: !Ref ApplicationName
-          Image: !Ref ECRRepositoryUri # This gets passed as param from ecs.json generated in buildspec
+          Image: !Ref EcrImageUri # This gets passed as param from ecs.json generated in buildspec
           PortMappings:
             - ContainerPort: 8081
-          # Secrets:
-          #   - Name: DB_USERNAME
-          #     ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:username}}'
-          #   - Name: DB_PASSWORD
-          #     ValueFrom: !Sub '{{resolve:secretsmanager:mysql:SecretString:password}}'
+          Secrets:
+            - Name: DB_USERNAME
+              ValueFrom: '{{resolve:secretsmanager:mysql-username:SecretString:username}}'
+            - Name: DB_PASSWORD
+              ValueFrom: '{{resolve:secretsmanager:mysql-password:SecretString:password}}'
+            - Name: JWT_KEY
+              ValueFrom: '{{resolve:secretsmanager:jwt-secret-key:SecretString:jwt-secret-key}}'
           Environment:
             - Name: APPLICATION_NAME
               Value: !Sub ${ApplicationName}
@@ -85,14 +87,12 @@ Resources:
               Value: !Ref ApplicationEnvironment
             - Name: PORT
               Value: '8081'
-            - Name: EUREKA_URL
-              Value: http://3.15.12.185:8761/eureka
-            # - Name: DB_HOST_URL
-            #   Value: !Join
-            #     - ''
-            #     - - !Sub 'jdbc:mysql://{{resolve:secretsmanager:mysql:SecretString:host}}'
-            #       - !Sub ':{{resolve:secretsmanager:mysql:SecretString:port}}'
-            #       - !Sub '/{{resolve:secretsmanager:mysql:SecretString:dbname}}'
+            - Name: DB_HOST_URL
+              Value: !Join
+                - ''
+                - - 'jdbc:mysql://{{resolve:secretsmanager:mysql:SecretString:host}}'
+                  - ':{{resolve:secretsmanager:mysql:SecretString:port}}'
+                  - '/{{resolve:secretsmanager:mysql:SecretString:dbname}}'
           Essential: true
           Memory: 1024
           LogConfiguration:
