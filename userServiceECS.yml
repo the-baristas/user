@@ -78,8 +78,8 @@ Resources:
               ValueFrom: '{{resolve:secretsmanager:mysql-username:SecretString:username}}'
             - Name: DB_PASSWORD
               ValueFrom: '{{resolve:secretsmanager:mysql-password:SecretString:password}}'
-            - Name: JWT_KEY
-              ValueFrom: '{{resolve:secretsmanager:jwt-secret-key:SecretString:jwt-secret-key}}'
+            # - Name: JWT_KEY
+            #   ValueFrom: '{{resolve:secretsmanager:jwt-secret-key:SecretString:jwt-secret-key}}'
           Environment:
             - Name: APPLICATION_NAME
               Value: !Sub ${ApplicationName}
