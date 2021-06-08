@@ -79,9 +79,9 @@ Resources:
             - Name: APPLICATION_ENVIRONMENT
               Value: !Ref ApplicationEnvironment
             - Name: DB_USERNAME
-              Value: {{resolve:secretsmanager:mysql-username:SecretString:username}}
+              Value: '{{resolve:secretsmanager:mysql-username:SecretString:username}}'
             - Name: DB_PASSWORD
-              Value: {{resolve:secretsmanager:mysql-password:SecretString:password}}
+              Value: '{{resolve:secretsmanager:mysql-password:SecretString:password}}'
             - Name: PORT
               Value: '8081'
             - Name: DB_HOST_URL
