@@ -73,18 +73,15 @@ Resources:
           Image: !Ref EcrImageUri # This gets passed as param from ecs.json generated in buildspec
           PortMappings:
             - ContainerPort: 8081
-          Secrets:
-            - Name: DB_USERNAME
-              ValueFrom: arn:aws:secretsmanager:us-east-2:135316859264:secret:mysql-username-lvDL7E
-            - Name: DB_PASSWORD
-              ValueFrom: arn:aws:secretsmanager:us-east-2:135316859264:secret:mysql-password-NT2LT4
-            # - Name: JWT_KEY
-            #   ValueFrom: '{{resolve:secretsmanager:jwt-secret-key:SecretString:jwt-secret-key}}'
           Environment:
             - Name: APPLICATION_NAME
               Value: !Sub ${ApplicationName}
             - Name: APPLICATION_ENVIRONMENT
               Value: !Ref ApplicationEnvironment
+            - Name: DB_USERNAME
+              Value: {{resolve:secretsmanager:mysql-username:SecretString:username}}
+            - Name: DB_PASSWORD
+              Value: {{resolve:secretsmanager:mysql-password:SecretString:password}}
             - Name: PORT
               Value: '8081'
             - Name: DB_HOST_URL

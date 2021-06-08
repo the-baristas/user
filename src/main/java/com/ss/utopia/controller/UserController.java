@@ -149,7 +149,6 @@ public class UserController {
 	}
 	
 	public void checkUsernameRequestMatchesResponse(Map<String, String> header, String responseUsername) {
-		System.out.println(header);
 		JwtTokenVerifier tokenVerifier = new JwtTokenVerifier();
 		String username = tokenVerifier.getUsernameFromToken(header.get("authorization"));
 		String role = new JwtTokenVerifier().getRoleFromToken(header.get("authorization"));
