@@ -75,9 +75,9 @@ Resources:
             - ContainerPort: 8081
           Secrets:
             - Name: DB_USERNAME
-              ValueFrom: '{{resolve:secretsmanager:mysql-username:SecretString:username}}'
+              ValueFrom: arn:aws:secretsmanager:us-east-2:135316859264:secret:mysql-username-lvDL7E
             - Name: DB_PASSWORD
-              ValueFrom: '{{resolve:secretsmanager:mysql-password:SecretString:password}}'
+              ValueFrom: arn:aws:secretsmanager:us-east-2:135316859264:secret:mysql-password-NT2LT4
             # - Name: JWT_KEY
             #   ValueFrom: '{{resolve:secretsmanager:jwt-secret-key:SecretString:jwt-secret-key}}'
           Environment:
