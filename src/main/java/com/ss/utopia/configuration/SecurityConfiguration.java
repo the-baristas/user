@@ -23,6 +23,9 @@ import com.ss.utopia.login.jwt.JwtUserAuthenticationFilter;
 @EnableGlobalMethodSecurity(prePostEnabled=true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
+	@Value("${jwt.secretKey}")
+    private String jwtSecretKey;
+	
 	@Autowired
 	UtopiaUserDetailsService utopiaUserDetailsService;
 	
@@ -37,8 +40,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and()
-		.addFilter(new JwtUserAuthenticationFilter(authenticationManager()))
-		.addFilterAfter(new JwtTokenVerifier(), JwtUserAuthenticationFilter.class)
+		.addFilter(new JwtUserAuthenticationFilter(authenticationManager(), jwtSecretKey))
+		.addFilterAfter(new JwtTokenVerifier(jwtSecretKey), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.antMatchers(HttpMethod.GET, "/users/health").permitAll()

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,6 +73,9 @@ class UserControllerTests {
 	@MockBean
 	private UtopiaUserDetailsService userDetailsService;
 	
+	@Value("${jwt.secretKey}")
+    private String jwtSecretKey;
+	
 	private WebTestClient webTestClient;
 	
 	@BeforeEach
@@ -94,7 +98,7 @@ class UserControllerTests {
 			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey())
+			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
 			.compact();
 		
 		when(userService.getUserById(1)).thenReturn(user);
@@ -119,7 +123,7 @@ class UserControllerTests {
 			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey())
+			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
 			.compact();
 		
 		when(userService.getUserById(1)).thenReturn(user);
@@ -138,7 +142,7 @@ class UserControllerTests {
 			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey())
+			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
 			.compact();
 
 		when(userService.getUserByEmail("username@email.org")).thenReturn(user);
@@ -162,7 +166,7 @@ class UserControllerTests {
 			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey())
+			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
 			.compact();
 
 		when(userService.getUserByUsername("someUsername23")).thenReturn(user);
@@ -186,7 +190,7 @@ class UserControllerTests {
 			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey())
+			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
 			.compact();
 
 		when(userService.getUserByPhoneNumber("1111111111")).thenReturn(user);
@@ -261,7 +265,7 @@ class UserControllerTests {
 			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey())
+			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
 			.compact();
 
 		when(userService.getUserById(userDto.getUserId())).thenReturn(user);

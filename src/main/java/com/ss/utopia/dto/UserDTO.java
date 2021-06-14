@@ -17,18 +17,23 @@ public class UserDTO {
 	
 	
 	private int userId;
+	
 	@NotBlank(message ="Must include a first name.")
 	private String givenName;
+	
 	@NotBlank(message = "Must include a last name.")
 	private String familyName;
+	
 	@NotBlank(message = "Must include a username.")
 	private String username;
 
 	@NotNull(message = "Must include a email.")
 	private String email;
+	
 	@NotBlank(message = "Must include a password.")
 	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
+	
 	@NotBlank(message = "Must include a phone number.")
 	private String phone;
 	
