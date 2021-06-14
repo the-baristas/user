@@ -2,13 +2,12 @@ package com.ss.utopia.login.jwt;
 
 import javax.crypto.SecretKey;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.google.common.net.HttpHeaders;
+import com.ss.utopia.configuration.SecurityConfiguration;
 
 import io.jsonwebtoken.security.Keys;
 
-@ConfigurationProperties(prefix = "application.jwt")
 public class JwtUtils {
 	
 	private JwtUtils() {}
@@ -16,6 +15,7 @@ public class JwtUtils {
 	private static String secretKey = "202this320#@3mis209goodc3m0kenoughdWPD<MW@3-90i1#)%4820jffFWEQ3291-12";
 	private static String tokenPrefix = "Bearer ";
 	private static Integer tokenExpirationAfterDays = 14;
+	
 	
 	public static String getRawKey() {
 		return secretKey;

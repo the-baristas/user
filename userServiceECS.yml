@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: ECS Base Template
+Parameters:
+  ApplicationEnvironment:
+    Type: String
+    Default: dev
+  ApplicationName:
+    Type: String
+    Default: user-service
+  EcrImageUri:
+    Type: String
+    Default: 135316859264.dkr.ecr.us-east-2.amazonaws.com/user-service:latest
+    Description: Full Uri for consumer docker image to run in container
+Resources:
+  # Role for ECS container
+  ContainerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ApplicationName}-${ApplicationEnvironment}-ContainerExecutionRole'
+      Description: IAM Role for ECS container
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ecs-tasks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Tags:
+          - Key: ApplicationName
+            Value: !Ref ApplicationName
+          - Key: ApplicationEnvironment
+            Value: !Ref ApplicationEnvironment
+  # Fargate ECS Service
+  MicroService:
+    Type: AWS::ECS::Service
+    #DependsOn: ApiListenerRule
+    Properties:
+      ServiceName: !Join ['-', [!Ref ApplicationName, !Ref ApplicationEnvironment]]
+      Cluster: '{{resolve:secretsmanager:ecs-cluster-name:SecretString:ecs-cluster-name}}'
+      TaskDefinition: !Ref TaskDefinition
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 100
+        MaximumPercent: 200
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - '{{resolve:secretsmanager:public-subnet:SecretString:public-subnet}}'
+          SecurityGroups:
+            - '{{resolve:secretsmanager:vpc-security-group:SecretString:vpc-security-group}}'
+      LoadBalancers:
+        - ContainerName: !Ref ApplicationName
+          ContainerPort: 8081
+          TargetGroupArn: arn:aws:elasticloadbalancing:us-east-2:135316859264:targetgroup/user-service-target-group/db1fe292a44ddc9c
+  # Fargate Task Definition
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${ApplicationName}-${ApplicationEnvironment}
+      RequiresCompatibilities:
+        - FARGATE
+      Memory: '2048'
+      Cpu: '256'
+      NetworkMode: awsvpc
+      ExecutionRoleArn: '{{resolve:secretsmanager:ecs-task-execution-role:SecretString:ecs-task-execution-role}}'
+      TaskRoleArn: !Ref ContainerExecutionRole
+      ContainerDefinitions:
+        - Name: !Ref ApplicationName
+          Image: !Ref EcrImageUri # This gets passed as param from ecs.json generated in buildspec
+          PortMappings:
+            - ContainerPort: 8081
+          Environment:
+            - Name: APPLICATION_NAME
+              Value: !Sub ${ApplicationName}
+            - Name: APPLICATION_ENVIRONMENT
+              Value: !Ref ApplicationEnvironment
+            - Name: DB_USERNAME
+              Value: '{{resolve:secretsmanager:mysql-username:SecretString:username}}'
+            - Name: DB_PASSWORD
+              Value: '{{resolve:secretsmanager:mysql-password:SecretString:password}}'
+            - Name: PORT
+              Value: '8081'
+            - Name: DB_HOST_URL
+              Value: !Join
+                - ''
+                - - 'jdbc:mysql://{{resolve:secretsmanager:mysql:SecretString:host}}'
+                  - ':{{resolve:secretsmanager:mysql:SecretString:port}}'
+                  - '/{{resolve:secretsmanager:mysql:SecretString:dbname}}'
+          Essential: true
+          Memory: 1024
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub /ecs/Baristas/${ApplicationName}/${ApplicationEnvironment}
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+              awslogs-create-group: 'true'
+  # TargetGroup:
+  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #   Properties:
+  #     HealthCheckIntervalSeconds: 60
+  #     HealthCheckPath: '/users/health'
+  #     HealthCheckTimeoutSeconds: 59
+  #     HealthCheckPort: '8081'
+  #     UnhealthyThresholdCount: 2
+  #     HealthyThresholdCount: 2
+  #     Name: !Sub '${ApplicationName}-${ApplicationEnvironment}-tg'
+  #     Port: 8081
+  #     Protocol: HTTP
+  #     TargetGroupAttributes:
+  #       - Key: deregistration_delay.timeout_seconds
+  #         Value: '60'
+  #     TargetType: ip
+  #     VpcId: '{{resolve:secretsmanager:vpc-id:SecretString:vpc-id}}'
+  # ApiListenerRule:
+  #   Type: AWS::ElasticLoadBalancingV2::ListenerRule
+  #   Properties:
+  #     Conditions:
+  #       - Field: path-pattern
+  #         Values:
+  #           - /*
+  #     Actions:
+  #       - Type: forward
+  #         TargetGroupArn: !Ref TargetGroup
+  #     ListenerArn: '{{resolve:secretsmanager:listener-arn:SecretString:user-service-listener-arn}}'
+  #     Priority: 10

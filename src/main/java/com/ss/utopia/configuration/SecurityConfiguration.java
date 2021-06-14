@@ -1,8 +1,7 @@
 package com.ss.utopia.configuration;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,18 +25,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	UtopiaUserDetailsService utopiaUserDetailsService;
-
-	
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception{
-		auth.userDetailsService(utopiaUserDetailsService);
+		auth.userDetailsService(utopiaUserDetailsService).passwordEncoder(passwordEncoder());
 	}
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception{
-		http.cors().and()
-		.csrf().disable()
+		http.cors().and().csrf().disable()
 		.sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and()
@@ -45,10 +41,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.addFilterAfter(new JwtTokenVerifier(), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
+		.antMatchers(HttpMethod.GET, "/users/health").permitAll()
+        .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 		.anyRequest().authenticated();
 		
 	}
-	
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
