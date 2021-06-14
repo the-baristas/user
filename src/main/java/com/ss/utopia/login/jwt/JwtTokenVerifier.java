@@ -28,6 +28,13 @@ import io.jsonwebtoken.Jwts;
 
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
+	private String rawSecretKey;
+	
+	public JwtTokenVerifier(String rawSecretKey) {
+		super();
+		this.rawSecretKey = rawSecretKey;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -73,7 +80,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 		String token = bearerToken.replace(JwtUtils.getTokenPrefix(), "");
 		
 		//Claims represents the fields of a JWT (sub, authorities, etc) as an object
-		return Jwts.parserBuilder().setSigningKey(JwtUtils.getRawKey().getBytes()).build()
+		return Jwts.parserBuilder().setSigningKey(rawSecretKey.getBytes()).build()
 		.parseClaimsJws(token);
 	}
 	

@@ -4,7 +4,6 @@ import javax.crypto.SecretKey;
 
 
 import com.google.common.net.HttpHeaders;
-import com.ss.utopia.configuration.SecurityConfiguration;
 
 import io.jsonwebtoken.security.Keys;
 
@@ -32,8 +31,8 @@ public class JwtUtils {
 		return HttpHeaders.AUTHORIZATION;
 	}
 	
-	public static SecretKey getSecretKey() {
-		return Keys.hmacShaKeyFor(secretKey.getBytes());
+	public static SecretKey getSecretKey(String rawSecretKey) {
+		return Keys.hmacShaKeyFor(rawSecretKey.getBytes());
 	}
 
 }

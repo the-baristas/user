@@ -25,10 +25,11 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 
 	private AuthenticationManager authenticationManager;
 
+	private String rawSecretKey;
 	
-	
-	public JwtUserAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public JwtUserAuthenticationFilter(AuthenticationManager authenticationManager, String rawSecretKey) {
 		this.authenticationManager = authenticationManager;
+		this.rawSecretKey = rawSecretKey;
 	}
 
 	@Override
@@ -62,7 +63,7 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 			.claim("authorities", authResult.getAuthorities())
 			.setIssuedAt(new Date())
 			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey())
+			.signWith(JwtUtils.getSecretKey(rawSecretKey))
 			.compact();
 
 		//Add the token to the response

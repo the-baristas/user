@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,25 @@ import com.ss.utopia.login.jwt.JwtTokenVerifier;
 import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+
 
 
 @RestController
 @RequestMapping("/users")
+@SecurityScheme(
+        name = "bearer", // can be set to anything
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer"
+)
+@OpenAPIDefinition(
+        info = @Info(title = "User Service", version = "v1"),
+        security = @SecurityRequirement(name = "bearer")
+)
 public class UserController {
 
 	@Autowired
@@ -40,6 +56,9 @@ public class UserController {
 	
 	@Autowired
 	private UserRoleService userRoleService;
+	
+	@Value("${jwt.secretKey}")
+    private String jwtSecretKey;
 	
 	@GetMapping("health")
 	public String healthCheck() {
@@ -149,9 +168,9 @@ public class UserController {
 	}
 	
 	public void checkUsernameRequestMatchesResponse(Map<String, String> header, String responseUsername) {
-		JwtTokenVerifier tokenVerifier = new JwtTokenVerifier();
+		JwtTokenVerifier tokenVerifier = new JwtTokenVerifier(jwtSecretKey);
 		String username = tokenVerifier.getUsernameFromToken(header.get("authorization"));
-		String role = new JwtTokenVerifier().getRoleFromToken(header.get("authorization"));
+		String role = new JwtTokenVerifier(jwtSecretKey).getRoleFromToken(header.get("authorization"));
 		
 		//if the user who sent the request is not an admin, then they can't view other users' information
 		//they can only view and alter their own
