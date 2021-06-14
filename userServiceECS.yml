@@ -47,9 +47,9 @@ Resources:
       LaunchType: FARGATE
       NetworkConfiguration:
         AwsvpcConfiguration:
-          AssignPublicIp: ENABLED
+          AssignPublicIp: DISABLED
           Subnets:
-            - '{{resolve:secretsmanager:public-subnet:SecretString:public-subnet}}'
+            - '{{resolve:secretsmanager:private-subnet:SecretString:private-subnet}}'
           SecurityGroups:
             - '{{resolve:secretsmanager:vpc-security-group:SecretString:vpc-security-group}}'
       LoadBalancers:
