@@ -82,6 +82,8 @@ Resources:
               Value: '{{resolve:secretsmanager:mysql-username:SecretString:username}}'
             - Name: DB_PASSWORD
               Value: '{{resolve:secretsmanager:mysql-password:SecretString:password}}'
+            - Name: JWT_KEY
+              Value: '{{resolve:secretsmanager:jwt-secret-key:SecretString:jwt-secret-key}}'
             - Name: PORT
               Value: '8081'
             - Name: DB_HOST_URL
