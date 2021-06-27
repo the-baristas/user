@@ -1,5 +1,9 @@
 package com.ss.utopia.configuration;
 
+import com.ss.utopia.login.UtopiaUserDetailsService;
+import com.ss.utopia.login.jwt.JwtTokenVerifier;
+import com.ss.utopia.login.jwt.JwtUserAuthenticationFilter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.ss.utopia.login.UtopiaUserDetailsService;
-import com.ss.utopia.login.jwt.JwtTokenVerifier;
-import com.ss.utopia.login.jwt.JwtUserAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @EnableWebSecurity
 @Configuration
@@ -36,7 +37,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception{
-		http.cors().and().csrf().disable()
+		http.cors().and()
+        .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
 		.sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and()
