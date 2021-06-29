@@ -64,6 +64,11 @@ public class UserController {
 	public String healthCheck() {
 		return "ye";
 	}
+
+    @GetMapping("csrf-token")
+    public ResponseEntity<Void> getCsrfToken() {
+        return ResponseEntity.noContent().build();
+    }
 	
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("")
