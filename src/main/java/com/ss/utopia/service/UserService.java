@@ -92,6 +92,7 @@ public class UserService {
 		userDAO.deleteById(deleted.getUserId());
 	}
 
+	//TODO: REFACTOR
 	private void checkNoDuplicateFields(User newUser) throws ResponseStatusException {
 		List<User> users = userDAO.findAll();
 		for (User user : users) {
