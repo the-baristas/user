@@ -28,7 +28,7 @@ public class UtopiauserApplication {
 		               .allowedOriginPatterns("*")
 		               .allowedMethods("*")
 			           .allowedHeaders("*")
-		               .exposedHeaders("Authorization", "X-XSRF-TOKEN")
+		               .exposedHeaders("Authorization")
                        .allowCredentials(true);
             }
         };
