@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -40,15 +39,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.cors().and()
         .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
 		.sessionManagement()
-		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		.and()
 		.addFilter(new JwtUserAuthenticationFilter(authenticationManager(), jwtSecretKey))
 		.addFilterAfter(new JwtTokenVerifier(jwtSecretKey), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
+		.antMatchers("/login").permitAll()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.antMatchers(HttpMethod.GET, "/users/health").permitAll()
         .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 		.anyRequest().authenticated();
+		
+		
 		
 	}
 

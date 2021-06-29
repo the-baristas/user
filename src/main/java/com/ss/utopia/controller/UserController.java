@@ -64,6 +64,10 @@ public class UserController {
 	public String healthCheck() {
 		return "ye";
 	}
+	@PostMapping("health")
+	public String healthCheckPost() {
+		return "good";
+	}
 	
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("")
