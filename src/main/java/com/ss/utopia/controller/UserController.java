@@ -25,8 +25,10 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.ss.utopia.dto.UserDTO;
+import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.login.jwt.JwtTokenVerifier;
+import com.ss.utopia.service.RegistrationConfirmationService;
 import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
@@ -56,6 +58,9 @@ public class UserController {
 	
 	@Autowired
 	private UserRoleService userRoleService;
+	
+	@Autowired
+	private RegistrationConfirmationService confirmationService;
 	
 	@Value("${jwt.secretKey}")
     private String jwtSecretKey;
@@ -156,6 +161,26 @@ public class UserController {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 	}
+	
+	@PostMapping("registration")
+	public ResponseEntity<String> registerUser(@RequestBody UserDTO userDto){
+		
+		RegistrationConfirmation confirmation = userService.registerUser(dtoToEntity(userDto));
+		
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(confirmation.getToken());
+	}
+	
+	@PutMapping("registration/{confirmationToken}")
+	public ResponseEntity<UserDTO> confirmRegistration(@PathVariable String confirmationToken, UriComponentsBuilder builder){
+		
+		RegistrationConfirmation confirmation = confirmationService.findByToken(confirmationToken);
+		
+		User user = userService.confirmRegistration(confirmation);
+		
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.location(builder.path("/users/{userId}")
+						.buildAndExpand(user.getUserId()).toUri()).body(entityToDto(user));	}
 	
 	public UserDTO entityToDto(User user) {
 		ModelMapper mapper = new ModelMapper();

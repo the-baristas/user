@@ -1,16 +1,21 @@
 package com.ss.utopia.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.Utils;
+import com.ss.utopia.dao.RegistrationConfirmationDAO;
 import com.ss.utopia.dao.UserDAO;
+import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
 
 @Service
@@ -18,6 +23,11 @@ public class UserService {
 
 	@Autowired
 	private UserDAO userDAO;
+	
+	@Autowired
+	RegistrationConfirmationDAO confirmationDAO;
+	
+	private Integer confirmationExpirationMinutes = 15;
 
 	public User getUserById(Integer userId) throws ResponseStatusException {
 		return userDAO.findById(userId).orElseThrow(
@@ -90,6 +100,43 @@ public class UserService {
 		User deleted = userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 		userDAO.deleteById(deleted.getUserId());
+	}
+	
+	@Transactional
+	public RegistrationConfirmation registerUser(User user) throws ResponseStatusException {
+		
+		RegistrationConfirmation confirmation = new RegistrationConfirmation(
+		UUID.randomUUID().toString(),
+		LocalDateTime.now(),
+		LocalDateTime.now().plusMinutes(confirmationExpirationMinutes),
+		user
+		);	
+		
+		user.setActive(false);
+		addUser(user);
+		
+		RegistrationConfirmation saved = confirmationDAO.save(confirmation);
+		
+		//TODO send email
+		
+		return saved;
+	}
+	
+	public User confirmRegistration(RegistrationConfirmation confirmation ) {
+		User user = confirmation.getUser();
+		
+		LocalDateTime currentTime = LocalDateTime.now();
+		if(currentTime.isAfter(confirmation.getExpiresAt())) {
+			//TODO send email
+			
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"This confirmation code has expired. Another email will be sent to " + user.getEmail());
+		}
+		
+		user.setActive(true);
+		userDAO.save(user);
+		
+		return user;
 	}
 
 	//TODO: REFACTOR
