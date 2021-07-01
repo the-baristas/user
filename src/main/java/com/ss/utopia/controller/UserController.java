@@ -171,16 +171,15 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(confirmation.getToken());
 	}
 	
-	@PutMapping("registration/{confirmationToken}")
-	public ResponseEntity<UserDTO> confirmRegistration(@PathVariable String confirmationToken, UriComponentsBuilder builder){
+	@GetMapping("registration/{confirmationToken}")
+	public String confirmRegistration(@PathVariable String confirmationToken, UriComponentsBuilder builder){
 		
 		RegistrationConfirmation confirmation = confirmationService.findByToken(confirmationToken);
 		
 		User user = userService.confirmRegistration(confirmation);
 		
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.location(builder.path("/users/{userId}")
-						.buildAndExpand(user.getUserId()).toUri()).body(entityToDto(user));	}
+		return "Thank you " + user.getGivenName() + ". Your account is now verified."; 	
+	}
 	
 	public UserDTO entityToDto(User user) {
 		ModelMapper mapper = new ModelMapper();

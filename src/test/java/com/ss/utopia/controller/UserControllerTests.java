@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -47,6 +46,7 @@ import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
 import com.ss.utopia.login.UtopiaUserDetailsService;
 import com.ss.utopia.login.jwt.JwtUtils;
+import com.ss.utopia.service.RegistrationConfirmationService;
 import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
@@ -69,6 +69,9 @@ class UserControllerTests {
 	
 	@MockBean
 	private UserRoleService userRoleService;
+	
+	@MockBean
+	private RegistrationConfirmationService confirmationService;
 	
 	@MockBean
 	private UtopiaUserDetailsService userDetailsService;

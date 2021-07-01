@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.ss.utopia.Utils;
 import com.ss.utopia.dao.RegistrationConfirmationDAO;
 import com.ss.utopia.dao.UserDAO;
+import com.ss.utopia.email.EmailSender;
 import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
 
@@ -26,6 +27,9 @@ public class UserService {
 	
 	@Autowired
 	RegistrationConfirmationDAO confirmationDAO;
+	
+	@Autowired
+	EmailSender emailSender;
 	
 	private Integer confirmationExpirationMinutes = 15;
 
@@ -117,11 +121,12 @@ public class UserService {
 		
 		RegistrationConfirmation saved = confirmationDAO.save(confirmation);
 		
-		//TODO send email
+		emailSender.sendEmail(user, saved);
 		
 		return saved;
 	}
 	
+	@Transactional
 	public User confirmRegistration(RegistrationConfirmation confirmation ) {
 		User user = confirmation.getUser();
 		
@@ -129,9 +134,21 @@ public class UserService {
 		if(currentTime.isAfter(confirmation.getExpiresAt())) {
 			//TODO send email
 			
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+			RegistrationConfirmation confirmationRetry = new RegistrationConfirmation(
+					UUID.randomUUID().toString(),
+					LocalDateTime.now(),
+					LocalDateTime.now().plusMinutes(confirmationExpirationMinutes),
+					user
+					);	
+					
+					RegistrationConfirmation saved = confirmationDAO.save(confirmationRetry);
+					emailSender.sendEmail(user, saved);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"This confirmation code has expired. Another email will be sent to " + user.getEmail());
 		}
+		
+		confirmation.setConfirmedAt(currentTime);
+		confirmationDAO.save(confirmation);
 		
 		user.setActive(true);
 		userDAO.save(user);
