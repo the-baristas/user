@@ -2,12 +2,12 @@ package com.ss.utopia.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -22,9 +22,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.ss.utopia.dao.RegistrationConfirmationDAO;
 import com.ss.utopia.dao.UserDAO;
+import com.ss.utopia.email.EmailSender;
+import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
+import com.ss.utopia.exception.ConfirmationExpiredException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTests {
@@ -33,7 +37,13 @@ class UserServiceTests {
 	private UserService userService;
 
 	@Mock
-	private UserDAO dao;
+	private UserDAO userDao;
+	
+	@Mock
+	private RegistrationConfirmationDAO confirmationDao;
+	
+	@Mock
+	private EmailSender emailSender;
 
 	
 	@Test
@@ -51,7 +61,7 @@ class UserServiceTests {
 		PageRequest pageRequest = PageRequest.of(0, 2);
 		Page<User> userPage = new PageImpl<User>(users);
 		
-		when(dao.findAll(pageRequest)).thenReturn(userPage);
+		when(userDao.findAll(pageRequest)).thenReturn(userPage);
 		
 		assertThat(userService.getAllUsers(0,2), is(userPage));
 		
@@ -62,7 +72,7 @@ class UserServiceTests {
 	void testGetUserById() throws ResponseStatusException {
 		Optional<User> user = getUserOptional();
 
-		when(dao.findById(1)).thenReturn(user);
+		when(userDao.findById(1)).thenReturn(user);
 
 		User userFromDB = userService.getUserById(1);
 
@@ -81,7 +91,7 @@ class UserServiceTests {
 		User user = makeUser();
 		List<User> userList = new ArrayList<User>();
 		userList.add(user);
-		when(dao.findByUserEmail(user.getEmail())).thenReturn(userList);
+		when(userDao.findByUserEmail(user.getEmail())).thenReturn(userList);
 
 		User userFromDB = userService.getUserByEmail(user.getEmail());
 
@@ -97,13 +107,13 @@ class UserServiceTests {
 	void testAddUserWithInvalidEmailException() {
 		User user = makeUser();
 
-		user.setEmail("invalidemail.com");
+		user.setEmail("invalidemail");
 
 		assertThrows(ResponseStatusException.class, () -> {
 			userService.addUser(user);
 		});
 
-		user.setEmail("email@invalid..net");
+		user.setEmail("email@..;invalid..net");
 		assertThrows(ResponseStatusException.class, () -> {
 			userService.addUser(user);
 		});
@@ -117,7 +127,7 @@ class UserServiceTests {
 		List<User> userList = new ArrayList<User>();
 		userList.add(user);
 
-		when(dao.findByUsername(user.getUsername())).thenReturn(userList);
+		when(userDao.findByUsername(user.getUsername())).thenReturn(userList);
 
 		User userFromDB = userService.getUserByUsername("someusername23");
 
@@ -138,7 +148,7 @@ class UserServiceTests {
 		List<User> userList = new ArrayList<User>();
 		userList.add(user);
 ;
-		when(dao.findByPhoneNumber(user.getPhone())).thenReturn(userList);
+		when(userDao.findByPhoneNumber(user.getPhone())).thenReturn(userList);
 
 		User userFromDB = userService.getUserByPhoneNumber("1111111111");
 
@@ -157,8 +167,8 @@ class UserServiceTests {
 	void testUpdateUser() throws ResponseStatusException {
 		Optional<User> user = getUserOptional();
 		
-		when(dao.findById(1)).thenReturn(user);
-		when(dao.save(user.get())).thenReturn(user.get());
+		when(userDao.findById(1)).thenReturn(user);
+		when(userDao.save(user.get())).thenReturn(user.get());
 		
 		User newUser = userService.addUser(user.get());
 		
@@ -183,6 +193,17 @@ class UserServiceTests {
 	}
 	
 	@Test
+	void testConfirmRegistrationSuccess() throws ConfirmationExpiredException {
+		User user = makeUser();
+		RegistrationConfirmation confirmation = makeConfirmation(user);
+		
+		when(userDao.save(user)).thenReturn(user);
+		when(confirmationDao.save(confirmation)).thenReturn(confirmation);
+		
+		Assertions.assertEquals(userService.confirmRegistration(confirmation), user);
+	}
+	
+	@Test
 	void testCheckNoDuplicateFields() {
 		List<User> users = new ArrayList<User>();
 		User user1 = makeUser();
@@ -197,7 +218,7 @@ class UserServiceTests {
 		User newUser = makeUser();
 		newUser.setUserId(3);
 		
-		when(dao.findAll()).thenReturn(users);
+		when(userDao.findAll()).thenReturn(users);
 		
 		Assertions.assertThrows(ResponseStatusException.class, () -> {
 			userService.addUser(newUser);});
@@ -211,6 +232,8 @@ class UserServiceTests {
 			userService.addUser(newUser);});
 		
 	}
+	
+	// ---- Helpers
 	
 	private User makeUser() {
 		User user = new User();
@@ -239,6 +262,15 @@ class UserServiceTests {
 		user.get().setPassword("pass");
 		
 		return user;
+	}
+	
+	private RegistrationConfirmation makeConfirmation(User user) {
+		return new RegistrationConfirmation(
+				"token",
+				LocalDateTime.now(),
+				LocalDateTime.now().plusMinutes(3),
+				user
+				);	
 	}
 
 }

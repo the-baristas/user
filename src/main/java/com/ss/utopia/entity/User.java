@@ -15,13 +15,8 @@ import javax.validation.constraints.Email;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-import lombok.Getter;
-import lombok.Setter;
-
 @Entity
 @Table(name = "user")
-@Getter
-@Setter
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

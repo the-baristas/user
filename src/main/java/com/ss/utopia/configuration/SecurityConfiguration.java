@@ -42,10 +42,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.addFilterAfter(new JwtTokenVerifier(jwtSecretKey), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
+		.antMatchers(HttpMethod.POST, "/users/registration").permitAll()
+		.antMatchers(HttpMethod.GET, "/users/registration/**").permitAll()
 		.antMatchers(HttpMethod.GET, "/users/health").permitAll()
         .mvcMatchers(HttpMethod.GET, "/users/csrf-token").permitAll()
-        .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-		.anyRequest().authenticated();
+        .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 	}
 
 	@Bean

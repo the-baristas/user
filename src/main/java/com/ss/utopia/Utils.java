@@ -20,7 +20,7 @@ public class Utils {
 	}
 	
 	public static void checkEmailValid(String email) throws ResponseStatusException {
-		Pattern pattern = Pattern.compile("^[a-z+[0-9]]{1,}[@][a-z+[0-9]]{1,}[\\.][a-z+[0-9]]{1,}$",
+		Pattern pattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.][a-zA-Z]{2,4}$",
 				Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(email);
 		if(!matcher.find())

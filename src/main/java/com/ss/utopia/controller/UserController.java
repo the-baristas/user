@@ -1,5 +1,6 @@
 package com.ss.utopia.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -25,8 +26,11 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.ss.utopia.dto.UserDTO;
+import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.exception.ConfirmationExpiredException;
 import com.ss.utopia.login.jwt.JwtTokenVerifier;
+import com.ss.utopia.service.RegistrationConfirmationService;
 import com.ss.utopia.service.UserRoleService;
 import com.ss.utopia.service.UserService;
 
@@ -56,6 +60,9 @@ public class UserController {
 	
 	@Autowired
 	private UserRoleService userRoleService;
+	
+	@Autowired
+	private RegistrationConfirmationService confirmationService;
 	
 	@Value("${jwt.secretKey}")
     private String jwtSecretKey;
@@ -156,6 +163,31 @@ public class UserController {
 		userService.deleteUserById(userId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+	}
+	
+	@PostMapping("registration")
+	public ResponseEntity<Map<String,String>> registerUser(@RequestBody UserDTO userDto){
+		
+		RegistrationConfirmation confirmation = userService.registerUser(dtoToEntity(userDto));
+		
+		Map<String, String> toReturn = new HashMap<String, String>();
+		toReturn.put("token", confirmation.getToken());
+		return ResponseEntity.status(HttpStatus.CREATED).body(toReturn);
+	}
+	
+	@GetMapping("registration/{confirmationToken}")
+	public String confirmRegistration(@PathVariable String confirmationToken, UriComponentsBuilder builder){
+		
+		RegistrationConfirmation confirmation = confirmationService.findByToken(confirmationToken);
+		
+		User user;
+		try {
+			user = userService.confirmRegistration(confirmation);
+		} catch (ConfirmationExpiredException e) {
+			return "This confirmation code has expired. Another email will be sent to " + e.getUserEmail();
+		}
+		
+		return "Thank you " + user.getGivenName() + ". Your account is now verified."; 	
 	}
 	
 	public UserDTO entityToDto(User user) {
