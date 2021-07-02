@@ -38,20 +38,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception{
 		http.cors().and()
         .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
-		.sessionManagement()
-		.and()
 		.addFilter(new JwtUserAuthenticationFilter(authenticationManager(), jwtSecretKey))
 		.addFilterAfter(new JwtTokenVerifier(jwtSecretKey), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
-		.antMatchers("/login").permitAll()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.antMatchers(HttpMethod.POST, "/users/registration").permitAll()
 		.antMatchers(HttpMethod.GET, "/users/registration/**").permitAll()
 		.antMatchers(HttpMethod.GET, "/users/health").permitAll()
+        .mvcMatchers(HttpMethod.GET, "/users/csrf-token").permitAll()
         .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
-		
-		
-		
 	}
 
 	@Bean
