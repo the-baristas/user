@@ -18,6 +18,7 @@ import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.email.EmailSender;
 import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.exception.ConfirmationExpiredException;
 
 @Service
 public class UserService {
@@ -126,13 +127,12 @@ public class UserService {
 		return saved;
 	}
 	
-	@Transactional
-	public User confirmRegistration(RegistrationConfirmation confirmation ) {
+
+	public User confirmRegistration(RegistrationConfirmation confirmation ) throws ConfirmationExpiredException {
 		User user = confirmation.getUser();
 		
 		LocalDateTime currentTime = LocalDateTime.now();
 		if(currentTime.isAfter(confirmation.getExpiresAt())) {
-			//TODO send email
 			
 			RegistrationConfirmation confirmationRetry = new RegistrationConfirmation(
 					UUID.randomUUID().toString(),
@@ -143,8 +143,7 @@ public class UserService {
 					
 					RegistrationConfirmation saved = confirmationDAO.save(confirmationRetry);
 					emailSender.sendEmail(user, saved);
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"This confirmation code has expired. Another email will be sent to " + user.getEmail());
+			throw new ConfirmationExpiredException(user.getEmail());
 		}
 		
 		confirmation.setConfirmedAt(currentTime);

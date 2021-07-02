@@ -17,7 +17,6 @@ class UtilsCheckValidFieldsTests {
 		assertThrows( ResponseStatusException.class, () -> {Utils.checkEmailValid("email@gmail.");} );
 		assertThrows( ResponseStatusException.class, () -> {Utils.checkEmailValid("email@gmail");} );
 		assertThrows( ResponseStatusException.class, () -> {Utils.checkEmailValid("em@ail@gmail.com");} );
-		assertThrows( ResponseStatusException.class, () -> {Utils.checkEmailValid("email.email@gmail.com");} );
 		assertThrows( ResponseStatusException.class, () -> {Utils.checkEmailValid("email.gmail.com");} );
 	}
 
@@ -26,7 +25,7 @@ class UtilsCheckValidFieldsTests {
 		assertDoesNotThrow(() -> {Utils.checkEmailValid("email@gmail.com");});
 		assertDoesNotThrow(() -> {Utils.checkEmailValid("anthony2345@yahoo.com");});
 		assertDoesNotThrow(() -> {Utils.checkEmailValid("df5@website.gov");});
-		assertDoesNotThrow(() -> {Utils.checkEmailValid("validemail@site.ca");});
+		assertDoesNotThrow(() -> {Utils.checkEmailValid("valid.email@site.ca");});
 	}
 	
 	@Test

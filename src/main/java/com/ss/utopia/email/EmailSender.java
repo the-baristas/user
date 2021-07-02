@@ -2,6 +2,7 @@ package com.ss.utopia.email;
 
 import javax.mail.MessagingException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.ss.utopia.entity.RegistrationConfirmation;
@@ -18,13 +19,15 @@ import software.amazon.awssdk.services.ses.model.SesException;
 
 @Service
 public class EmailSender {
+	
+	@Value("${aws.emailSender}")
+    private String sender;
 
-	Region region = Region.US_EAST_2;
+	private Region region = Region.US_EAST_2;
 	
-	String baseUrl = "http://localhost:8081/users/registration/";
+	private String baseUrl = "http://localhost:8081/users/registration/";
 	
-	String subject = "Utopia Airlines Account Verification";
-	String sender = "anthony.sirimarco@smoothstack.com";
+	private String subject = "Utopia Airlines Account Verification";
 	
 	public void sendEmail(User user, RegistrationConfirmation confirmation) {
 		String recipient = user.getEmail();

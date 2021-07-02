@@ -1,5 +1,6 @@
 package com.ss.utopia.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -27,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
+import com.ss.utopia.exception.ConfirmationExpiredException;
 import com.ss.utopia.login.jwt.JwtTokenVerifier;
 import com.ss.utopia.service.RegistrationConfirmationService;
 import com.ss.utopia.service.UserRoleService;
@@ -68,10 +70,6 @@ public class UserController {
 	@GetMapping("health")
 	public String healthCheck() {
 		return "ye";
-	}
-	@PostMapping("health")
-	public String healthCheckPost() {
-		return "good";
 	}
 	
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -163,12 +161,13 @@ public class UserController {
 	}
 	
 	@PostMapping("registration")
-	public ResponseEntity<String> registerUser(@RequestBody UserDTO userDto){
+	public ResponseEntity<Map<String,String>> registerUser(@RequestBody UserDTO userDto){
 		
 		RegistrationConfirmation confirmation = userService.registerUser(dtoToEntity(userDto));
 		
-		
-		return ResponseEntity.status(HttpStatus.CREATED).body(confirmation.getToken());
+		Map<String, String> toReturn = new HashMap<String, String>();
+		toReturn.put("token", confirmation.getToken());
+		return ResponseEntity.status(HttpStatus.CREATED).body(toReturn);
 	}
 	
 	@GetMapping("registration/{confirmationToken}")
@@ -176,7 +175,12 @@ public class UserController {
 		
 		RegistrationConfirmation confirmation = confirmationService.findByToken(confirmationToken);
 		
-		User user = userService.confirmRegistration(confirmation);
+		User user;
+		try {
+			user = userService.confirmRegistration(confirmation);
+		} catch (ConfirmationExpiredException e) {
+			return "This confirmation code has expired. Another email will be sent to " + e.getUserEmail();
+		}
 		
 		return "Thank you " + user.getGivenName() + ". Your account is now verified."; 	
 	}

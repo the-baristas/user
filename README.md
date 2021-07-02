@@ -45,3 +45,7 @@ MYSQL_USERNAME
 MYSQL_PASSWORD
 DB_HOST_URL
 JWT_KEY
+AWS_EMAIL_SENDER
+
+To run this, you will also need valid AWS credentials:
+https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/get-started.html

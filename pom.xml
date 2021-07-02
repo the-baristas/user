@@ -169,6 +169,8 @@
 				<configuration>
 					<excludes>
 						<exclude>**/com/ss/utopia/login/jwt/*</exclude>
+						<exclude>**/com/ss/utopia/email/*</exclude>
+						<exclude>**/com/ss/utopia/exception/*</exclude>
 					</excludes>
 				</configuration>
 				<executions>

@@ -48,7 +48,7 @@ public class JwtUserAuthenticationFilter extends UsernamePasswordAuthenticationF
 
 			return authenticationManager.authenticate(authentication);
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials.");
 		}

@@ -15,11 +15,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,8 +44,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ss.utopia.dto.UserDTO;
+import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
+import com.ss.utopia.exception.ConfirmationExpiredException;
 import com.ss.utopia.login.UtopiaUserDetailsService;
 import com.ss.utopia.login.jwt.JwtUtils;
 import com.ss.utopia.service.RegistrationConfirmationService;
@@ -89,6 +93,12 @@ class UserControllerTests {
 	@Test
 	void controllerLoads() throws Exception {
 		assertNotNull(controller);
+	}
+	
+	@Test
+	void testHealthCheck() {
+		webTestClient.get().uri("/users/health")
+    	.exchange().expectStatus().isOk();
 	}
 
 	@Test
@@ -243,6 +253,34 @@ class UserControllerTests {
 		mockMvc.perform(get("/users?page=0&size=2").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
 	}
+	
+	@Test
+	void testSearchUsersBySearchTerm() throws Exception {
+		List<User> users = new ArrayList<User>();
+		User user1 = makeUser();
+		User user2 = makeUser();
+		user2.setUserId(2);
+		user2.setEmail("bb@gmail.com");
+		user2.setPhone("8195678900");
+		users.add(user1);
+		users.add(user2);
+		
+		List<UserDTO> userDtos = new ArrayList<UserDTO>();
+		UserDTO userDto1 = makeUserDTO();
+		UserDTO userDto2 = makeUserDTO();
+		userDto2.setUserId(2);
+		userDto2.setEmail("bb@gmail.com");
+		userDto2.setPhone("8195678900");
+		userDtos.add(userDto1);
+		userDtos.add(userDto2);
+		
+		Page<User> userPage = new PageImpl<User>(users);
+				
+		when(userService.findAllUserBySearchTerm("word", 0, 2)).thenReturn(userPage);
+
+		mockMvc.perform(get("/users/search?term=word&page=0&size=2").contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 
 	@Test
 	void testAddUser() throws Exception {
@@ -300,6 +338,65 @@ class UserControllerTests {
 				"Could not find user with id = " + 99)).when(userService).deleteUserById(99);
 		mockMvc.perform(delete("/users/99")).andExpect(status().isNotFound());
 	}
+	
+	
+	//--- Registration---
+	
+	@Test
+	void testRegisterUserSuccessReturnsCreated() {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		userDto.setPassword("password");
+		
+		RegistrationConfirmation confirmation = makeConfirmation(user);
+		
+		when(userService.registerUser(controller.dtoToEntity(userDto))).thenReturn(confirmation);
+		
+		webTestClient.post().uri("/users/registration")
+    	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true}")
+    	.exchange().expectStatus().isCreated().expectHeader()
+    	.contentType(MediaType.APPLICATION_JSON).expectBody(String.class);
+	}
+	
+	@Test
+	void testConfirmRegistrationSuccessfulReturnsSuccessMessage() throws Exception {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		userDto.setPassword("password");
+		
+		RegistrationConfirmation confirmation = makeConfirmation(user);
+		
+		when(userService.confirmRegistration(confirmation)).thenReturn(user);
+		when(confirmationService.findByToken(confirmation.getToken())).thenReturn(confirmation);
+		
+		String result = webTestClient.get().uri("/users/registration/" + confirmation.getToken())
+    	.exchange().expectStatus().isOk().expectBody().returnResult().toString();
+		
+		Assertions.assertTrue(result.contains("Thank you " + user.getGivenName() + ". Your account is now verified."));
+		
+	}
+	
+	@Test
+	void testConfirmRegistrationExpiredTokenReturnsFailedMessage() throws Exception {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		userDto.setPassword("password");
+		
+		RegistrationConfirmation confirmation = makeConfirmation(user);
+		
+		when(userService.confirmRegistration(confirmation)).thenThrow(new ConfirmationExpiredException(user.getEmail()));
+		when(confirmationService.findByToken(confirmation.getToken())).thenReturn(confirmation);
+		
+		String result = webTestClient.get().uri("/users/registration/" + confirmation.getToken())
+    	.exchange().expectStatus().isOk().expectBody().returnResult().toString();
+		
+		Assertions.assertTrue(result.contains("This confirmation code has expired. Another email will be sent to " + user.getEmail()));
+		
+	}
+	
+	
+	
+	//---Helpers
 
 	private UserDTO makeUserDTO() {
 		return controller.entityToDto(makeUser());
@@ -317,5 +414,14 @@ class UserControllerTests {
 		user.setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.setPassword("pass");
 		return user;
+	}
+	
+	private RegistrationConfirmation makeConfirmation(User user) {
+		return new RegistrationConfirmation(
+				"token",
+				LocalDateTime.now(),
+				LocalDateTime.now().plusMinutes(3),
+				user
+				);	
 	}
 }
