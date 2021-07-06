@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,7 +37,15 @@ public class ApplicationExceptionHandler {
     ResponseEntity<String> handleAuthenticationException(
     		AuthenticationException exception){
     	exception.printStackTrace();
-    	throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This account is locked. If you haven't yet, please verify your account.");
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+		        .body("This account is locked. If you haven't yet, please verify your account.");
+    }
+    
+    @ExceptionHandler(BadCredentialsException.class)
+    ResponseEntity<String> handleBadCredentialsException(
+    		BadCredentialsException exception){
+    	return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("Incorrect username and/or password.");
     }
     
     @ResponseStatus(HttpStatus.BAD_REQUEST)

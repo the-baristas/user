@@ -27,10 +27,10 @@ public class UserService {
 	private UserDAO userDAO;
 	
 	@Autowired
-	RegistrationConfirmationDAO confirmationDAO;
+	private RegistrationConfirmationDAO confirmationDAO;
 	
 	@Autowired
-	EmailSender emailSender;
+	private EmailSender emailSender;
 	
 	private Integer confirmationExpirationMinutes = 15;
 
@@ -122,7 +122,7 @@ public class UserService {
 		
 		RegistrationConfirmation saved = confirmationDAO.save(confirmation);
 		
-		emailSender.sendEmail(user, saved);
+		emailSender.sendConfirmationEmail(user, saved);
 		
 		return saved;
 	}
@@ -132,6 +132,8 @@ public class UserService {
 		User user = confirmation.getUser();
 		
 		LocalDateTime currentTime = LocalDateTime.now();
+		
+		//Resend email if previous email has expired
 		if(currentTime.isAfter(confirmation.getExpiresAt())) {
 			
 			RegistrationConfirmation confirmationRetry = new RegistrationConfirmation(
@@ -142,7 +144,7 @@ public class UserService {
 					);	
 					
 					RegistrationConfirmation saved = confirmationDAO.save(confirmationRetry);
-					emailSender.sendEmail(user, saved);
+					emailSender.sendConfirmationEmail(user, saved);
 			throw new ConfirmationExpiredException(user.getEmail());
 		}
 		
