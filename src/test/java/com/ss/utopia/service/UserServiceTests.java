@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,6 @@ import com.ss.utopia.email.EmailSender;
 import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
-import com.ss.utopia.exception.ConfirmationExpiredException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTests {
@@ -193,7 +193,7 @@ class UserServiceTests {
 	}
 	
 	@Test
-	void testConfirmRegistrationSuccess() throws ConfirmationExpiredException {
+	void testConfirmRegistrationSuccess() {
 		User user = makeUser();
 		RegistrationConfirmation confirmation = makeConfirmation(user);
 		
@@ -201,6 +201,29 @@ class UserServiceTests {
 		when(confirmationDao.save(confirmation)).thenReturn(confirmation);
 		
 		Assertions.assertEquals(userService.confirmRegistration(confirmation), user);
+	}
+	
+	@Test
+	void testConfirmRegistrationExpiredThrowsError() {
+		User user = makeUser();
+		RegistrationConfirmation confirmation = makeConfirmation(user);
+		confirmation.setExpiresAt(LocalDateTime.now().minusMinutes(10));
+		
+		when(confirmationDao.save(any())).thenReturn(confirmation);
+		
+		Assertions.assertThrows(ResponseStatusException.class, () -> {
+			userService.confirmRegistration(confirmation);});
+	}
+	
+	@Test
+	void testRegisterUser() {
+		User user = makeUser();
+		RegistrationConfirmation confirmation = makeConfirmation(user);
+		
+		when(confirmationDao.save(any())).thenReturn(confirmation);
+		when(userDao.save(user)).thenReturn(user);
+		
+		assertTrue(userService.registerUser(user).equals(confirmation));
 	}
 	
 	@Test

@@ -18,7 +18,6 @@ import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.email.EmailSender;
 import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
-import com.ss.utopia.exception.ConfirmationExpiredException;
 
 @Service
 public class UserService {
@@ -36,7 +35,7 @@ public class UserService {
 
 	public User getUserById(Integer userId) throws ResponseStatusException {
 		return userDAO.findById(userId).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id: " + userId));
 	}
 	
 	public Page<User> getAllUsers(Integer page, Integer size){
@@ -52,7 +51,7 @@ public class UserService {
 		try {
 			return userDAO.findByUserEmail(email).get(0);
 		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with email = " + email);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with email: " + email);
 		}
 
 	}
@@ -61,7 +60,7 @@ public class UserService {
 		try {
 			return userDAO.findByUsername(username).get(0);
 		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with username = " + username);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with username: " + username);
 		}
 	}
 	
@@ -69,7 +68,7 @@ public class UserService {
 		try {
 			return userDAO.findByPhoneNumber(phone).get(0);
 		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with phone number = " + phone);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with phone number: " + phone);
 		}
 	}
 
@@ -128,7 +127,7 @@ public class UserService {
 	}
 	
 
-	public User confirmRegistration(RegistrationConfirmation confirmation ) throws ConfirmationExpiredException {
+	public User confirmRegistration(RegistrationConfirmation confirmation ) {
 		User user = confirmation.getUser();
 		
 		LocalDateTime currentTime = LocalDateTime.now();
@@ -145,7 +144,8 @@ public class UserService {
 					
 					RegistrationConfirmation saved = confirmationDAO.save(confirmationRetry);
 					emailSender.sendConfirmationEmail(user, saved);
-			throw new ConfirmationExpiredException(user.getEmail());
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+						"This confirmation code has expired. Another email will be sent to " + user.getEmail());
 		}
 		
 		confirmation.setConfirmedAt(currentTime);

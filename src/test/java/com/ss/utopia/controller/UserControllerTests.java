@@ -47,7 +47,6 @@ import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.entity.UserRole;
-import com.ss.utopia.exception.ConfirmationExpiredException;
 import com.ss.utopia.login.UtopiaUserDetailsService;
 import com.ss.utopia.login.jwt.JwtUtils;
 import com.ss.utopia.service.RegistrationConfirmationService;
@@ -375,25 +374,6 @@ class UserControllerTests {
 		Assertions.assertTrue(result.contains("Thank you " + user.getGivenName() + ". Your account is now verified."));
 		
 	}
-	
-	@Test
-	void testConfirmRegistrationExpiredTokenReturnsFailedMessage() throws Exception {
-		User user = makeUser();
-		UserDTO userDto = makeUserDTO();
-		userDto.setPassword("password");
-		
-		RegistrationConfirmation confirmation = makeConfirmation(user);
-		
-		when(userService.confirmRegistration(confirmation)).thenThrow(new ConfirmationExpiredException(user.getEmail()));
-		when(confirmationService.findByToken(confirmation.getToken())).thenReturn(confirmation);
-		
-		String result = webTestClient.get().uri("/users/registration/" + confirmation.getToken())
-    	.exchange().expectStatus().isOk().expectBody().returnResult().toString();
-		
-		Assertions.assertTrue(result.contains("This confirmation code has expired. Another email will be sent to " + user.getEmail()));
-		
-	}
-	
 	
 	
 	//---Helpers

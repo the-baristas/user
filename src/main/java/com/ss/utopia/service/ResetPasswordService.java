@@ -6,14 +6,12 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ss.utopia.Utils;
 import com.ss.utopia.dao.ResetPasswordConfirmationDAO;
 import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.email.EmailSender;
-import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.ResetPasswordConfirmation;
 import com.ss.utopia.entity.User;
 import com.ss.utopia.exception.ConfirmationExpiredException;
@@ -53,8 +51,7 @@ public class ResetPasswordService {
 		return saved;
 	}
 	
-	@Transactional
-	public User changePassword(String token, String newPassword) throws ConfirmationExpiredException {
+	public User changePassword(String token, String newPassword) {
 		ResetPasswordConfirmation confirmation = findByToken(token);
 		User user = confirmation.getUser();
 		
@@ -72,7 +69,9 @@ public class ResetPasswordService {
 					
 			ResetPasswordConfirmation saved = confirmationDAO.save(confirmationRetry);
 			emailSender.sendForgetPasswordEmail(user, saved);
-			throw new ConfirmationExpiredException(user.getEmail());
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+					"This confirmation code has expired. Another email will be sent to " + user.getEmail());
+
 		}
 		
 		confirmation.setConfirmedAt(currentTime);

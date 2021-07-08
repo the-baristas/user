@@ -31,7 +31,7 @@ public class EmailSender {
 		String recipient = user.getEmail();
 		String name = user.getGivenName();
 		
-		String url = "http://127.0.0.1:3000/forgetpassword";
+		String url = "http://127.0.0.1:3000/resetpassword/" + confirmation.getToken();
 		
 		String bodyHtml = "<html>" + "<h1>Hello " + name + ", </h1>"
 				+ "<p>You will now be redirected to our website.</p> <a href='"

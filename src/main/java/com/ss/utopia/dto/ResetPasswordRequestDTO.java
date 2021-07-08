@@ -13,9 +13,6 @@ public class ResetPasswordRequestDTO {
 	@NotBlank(message = "Must include a token.")
 	private String token;
 	
-	@NotNull(message = "Must include an email.")
-	private String email;
-	
 	@NotNull(message = "Must include an updated password.")
 	private String password;
 	
@@ -32,18 +29,9 @@ public class ResetPasswordRequestDTO {
 		return token;
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
 	public void setToken(String token) {
 		this.token = token;
 	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	
 	
 
 }

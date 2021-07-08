@@ -27,6 +27,12 @@ public class ApplicationExceptionHandler {
                 .body(exception.getMessage());
     }
     
+    @ExceptionHandler(ConfirmationExpiredException.class)
+    void handleConfirmationExpiredException(ConfirmationExpiredException exception){
+		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+				"This confirmation code has expired. Another email will be sent to " + exception.getUserEmail());
+    }
+    
     @ExceptionHandler(ResponseStatusException.class)
     ResponseEntity<Void> handleResponseStatusException(
             ResponseStatusException exception) {
