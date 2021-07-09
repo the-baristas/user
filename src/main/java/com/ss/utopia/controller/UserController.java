@@ -71,11 +71,6 @@ public class UserController {
 	public String healthCheck() {
 		return "ye";
 	}
-
-    @GetMapping("csrf-token")
-    public ResponseEntity<Void> getCsrfToken() {
-        return ResponseEntity.noContent().build();
-    }
 	
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("")
@@ -176,17 +171,11 @@ public class UserController {
 	}
 	
 	@GetMapping("registration/{confirmationToken}")
-	public String confirmRegistration(@PathVariable String confirmationToken, UriComponentsBuilder builder){
+	public String confirmRegistration(@PathVariable String confirmationToken, UriComponentsBuilder builder) throws ConfirmationExpiredException{
 		
 		RegistrationConfirmation confirmation = confirmationService.findByToken(confirmationToken);
 		
-		User user;
-		try {
-			user = userService.confirmRegistration(confirmation);
-		} catch (ConfirmationExpiredException e) {
-			return "This confirmation code has expired. Another email will be sent to " + e.getUserEmail();
-		}
-		
+		User user = userService.confirmRegistration(confirmation);
 		return "Thank you " + user.getGivenName() + ". Your account is now verified."; 	
 	}
 	

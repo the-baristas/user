@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.ss.utopia.entity.RegistrationConfirmation;
+import com.ss.utopia.entity.ResetPasswordConfirmation;
 import com.ss.utopia.entity.User;
 
 import software.amazon.awssdk.regions.Region;
@@ -25,14 +26,38 @@ public class EmailSender {
 
 	private Region region = Region.US_EAST_2;
 	
-	private String baseUrl = "http://localhost:8081/users/registration/";
-	
-	private String subject = "Utopia Airlines Account Verification";
-	
-	public void sendEmail(User user, RegistrationConfirmation confirmation) {
+	public void sendForgetPasswordEmail(User user, ResetPasswordConfirmation confirmation) {
+		String subject = "Utopia Airlines Forgotten Account Password";
 		String recipient = user.getEmail();
 		String name = user.getGivenName();
-		String url = baseUrl + confirmation.getToken();
+		
+		String url = "http://127.0.0.1:3000/resetpassword/" + confirmation.getToken();
+		
+		String bodyHtml = "<html>" + "<h1>Hello " + name + ", </h1>"
+				+ "<p>You will now be redirected to our website.</p> <a href='"
+				+ url + "'>Click here to change your password.</a>"
+				+ "</html>";
+		
+		String bodyText = "Hello " + name + ", "
+				+ "Please use an email client that can display HTML.";
+		
+		SesClient client = SesClient.builder().region(region).build();
+		
+		try {
+			send(client, sender, recipient, subject, bodyHtml, bodyText);
+			client.close();
+			System.out.println("closed client........");
+		}
+		catch (MessagingException e){
+			e.getStackTrace();
+		}
+	}
+	
+	public void sendConfirmationEmail(User user, RegistrationConfirmation confirmation) {
+		String subject = "Utopia Airlines Account Verification";
+		String recipient = user.getEmail();
+		String name = user.getGivenName();
+		String url = "http://localhost:8081/users/registration/" + confirmation.getToken();
 		
 		String bodyHtml = "<html>" + "<h1>Hello " + name + ", </h1>"
 				+ "<p>You're almost done! <a href='" + url + "'>Click here to verify your account.</a>"
@@ -45,7 +70,7 @@ public class EmailSender {
 		try {
 			send(client, sender, recipient, subject, bodyHtml, bodyText);
 			client.close();
-			System.out.println("closing client........");
+			System.out.println("closed client........");
 		}
 		catch (MessagingException e){
 			e.getStackTrace();

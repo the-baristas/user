@@ -27,7 +27,7 @@ public class UserDTO {
 	@NotBlank(message = "Must include a username.")
 	private String username;
 
-	@NotNull(message = "Must include a email.")
+	@NotNull(message = "Must include an email.")
 	private String email;
 	
 	@NotBlank(message = "Must include a password.")
