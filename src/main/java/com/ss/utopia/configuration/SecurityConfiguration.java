@@ -1,9 +1,5 @@
 package com.ss.utopia.configuration;
 
-import com.ss.utopia.login.UtopiaUserDetailsService;
-import com.ss.utopia.login.jwt.JwtTokenVerifier;
-import com.ss.utopia.login.jwt.JwtUserAuthenticationFilter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +10,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import com.ss.utopia.login.UtopiaUserDetailsService;
+import com.ss.utopia.login.jwt.JwtTokenVerifier;
+import com.ss.utopia.login.jwt.JwtUserAuthenticationFilter;
 
 @EnableWebSecurity
 @Configuration
@@ -37,7 +37,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception{
 		http.cors().and()
-        .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
+        .csrf().disable()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
 		.addFilter(new JwtUserAuthenticationFilter(authenticationManager(), jwtSecretKey))
 		.addFilterAfter(new JwtTokenVerifier(jwtSecretKey), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
@@ -45,7 +47,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		.antMatchers(HttpMethod.POST, "/users/registration").permitAll()
 		.antMatchers(HttpMethod.GET, "/users/registration/**").permitAll()
 		.antMatchers(HttpMethod.GET, "/users/health").permitAll()
-        .mvcMatchers(HttpMethod.GET, "/users/csrf-token").permitAll()
         .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 	}
 
