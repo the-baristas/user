@@ -106,12 +106,7 @@ class UserControllerTests {
 		UserDTO userDto = makeUserDTO();
 
 		//Build tokens
-		String adminToken = Jwts.builder().setSubject("someUsername23")
-			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
-			.setIssuedAt(new Date())
-			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
-			.compact();
+		String adminToken = makeJwtToken();
 		
 		when(userService.getUserById(1)).thenReturn(user);
 
@@ -150,12 +145,7 @@ class UserControllerTests {
 		UserDTO userDto = makeUserDTO();
 		
 		//Build tokens
-		String adminToken = Jwts.builder().setSubject("someUsername23")
-			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
-			.setIssuedAt(new Date())
-			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
-			.compact();
+		String adminToken = makeJwtToken();
 
 		when(userService.getUserByEmail("username@email.org")).thenReturn(user);
 
@@ -174,12 +164,7 @@ class UserControllerTests {
 		UserDTO userDto = makeUserDTO();
 		
 		//Build tokens
-		String adminToken = Jwts.builder().setSubject("someUsername23")
-			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
-			.setIssuedAt(new Date())
-			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
-			.compact();
+		String adminToken = makeJwtToken();
 
 		when(userService.getUserByUsername("someUsername23")).thenReturn(user);
 
@@ -198,12 +183,7 @@ class UserControllerTests {
 		UserDTO userDto = makeUserDTO();
 		
 		//Build tokens
-		String adminToken = Jwts.builder().setSubject("someUsername23")
-			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
-			.setIssuedAt(new Date())
-			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
-			.compact();
+		String adminToken = makeJwtToken();
 
 		when(userService.getUserByPhoneNumber("1111111111")).thenReturn(user);
 
@@ -301,12 +281,7 @@ class UserControllerTests {
 		UserDTO userDto = makeUserDTO();
 		
 		//Build tokens
-		String adminToken = Jwts.builder().setSubject("someUsername23")
-			.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
-			.setIssuedAt(new Date())
-			.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
-			.signWith(JwtUtils.getSecretKey(jwtSecretKey))
-			.compact();
+		String adminToken = makeJwtToken();
 
 		when(userService.getUserById(userDto.getUserId())).thenReturn(user);
 
@@ -321,21 +296,46 @@ class UserControllerTests {
 		User user = makeUser();
 		UserDTO userDto = makeUserDTO();
 		
+		String adminToken = makeJwtToken();
+		
 		when(userService.getUserById(userDto.getUserId())).thenReturn(user);
 
 		doNothing().when(userService).deleteUserById(userDto.getUserId());
-		mockMvc.perform(delete("/users/{userId}", userDto.getUserId())).andExpect(status().isNoContent());
-
-		verify(userService, times(1)).deleteUserById(userDto.getUserId());
-		verifyNoMoreInteractions(userService);
+		mockMvc.perform(delete("/users/{userId}", userDto.getUserId()).header("authorization", adminToken))
+		.andExpect(status().isNoContent());
 	}
 	
 	@Test
 	void testDeleteUserhrowsUserNotFoundException() throws Exception {
+		
+		String adminToken = makeJwtToken();
 
-		doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
-				"Could not find user with id = " + 99)).when(userService).deleteUserById(99);
-		mockMvc.perform(delete("/users/99")).andExpect(status().isNotFound());
+		when(userService.getUserById(99)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
+				"Could not find user with id = " + 99));
+		mockMvc.perform(delete("/users/99").header("authorization", adminToken)).andExpect(status().isNotFound());
+	}
+	
+	@Test
+	void testDeleteUserByUsername() throws Exception {
+		User user = makeUser();
+		UserDTO userDto = makeUserDTO();
+		
+		String adminToken = makeJwtToken();
+		
+		when(userService.getUserByUsername("user")).thenReturn(user);
+
+		mockMvc.perform(delete("/users/username/user", userDto.getUserId()).header("authorization", adminToken))
+		.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	void testDeleteUserhrowsUserByUsernameNotFoundException() throws Exception {
+		
+		String adminToken = makeJwtToken();
+
+		when(userService.getUserByUsername("user")).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND,
+				"Could not find user with username = user"));
+		mockMvc.perform(delete("/users/username/user").header("authorization", adminToken)).andExpect(status().isNotFound());
 	}
 	
 	
@@ -403,5 +403,14 @@ class UserControllerTests {
 				LocalDateTime.now().plusMinutes(3),
 				user
 				);	
+	}
+	
+	private String makeJwtToken() {
+		return Jwts.builder().setSubject("someUsername23")
+				.claim("authorities", Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+				.setIssuedAt(new Date())
+				.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(JwtUtils.getTokenExpirationAfterDays())))
+				.signWith(JwtUtils.getSecretKey(jwtSecretKey))
+				.compact();
 	}
 }
