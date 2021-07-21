@@ -151,13 +151,24 @@ public class UserController {
 
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
 	@DeleteMapping("{userId}")
-	public ResponseEntity<String> deleteUser(@PathVariable Integer userId) throws ResponseStatusException {
-
+	public ResponseEntity<String> deleteUser(@PathVariable Integer userId,
+			@RequestHeader Map<String,String> header) throws ResponseStatusException {
+		UserDTO userDto = entityToDto(userService.getUserById(userId));
+		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
 		userService.deleteUserById(userId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
+	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@DeleteMapping("username/{username}")
+	public ResponseEntity<String> deleteUserByUsername(@PathVariable String username,
+			@RequestHeader Map<String,String> header) throws ResponseStatusException {
+		UserDTO userDto = entityToDto(userService.getUserByUsername(username));
+		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
+		userService.deleteUserById(userDto.getUserId());
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 	
 	@PostMapping("registration")
