@@ -14,7 +14,6 @@ import com.ss.utopia.dao.UserDAO;
 import com.ss.utopia.email.EmailSender;
 import com.ss.utopia.entity.ResetPasswordConfirmation;
 import com.ss.utopia.entity.User;
-import com.ss.utopia.exception.ConfirmationExpiredException;
 
 @Service
 public class ResetPasswordService {

@@ -79,8 +79,6 @@ public class UserService {
 
 		user.setPassword(Utils.passwordEncoder().encode(user.getPassword()));
 
-		checkNoDuplicateFields(user);
-
 		return userDAO.save(user);
 	}
 
@@ -96,7 +94,6 @@ public class UserService {
 			newUserInfo.setPassword(oldUserInfo.getPassword());
 		
 		newUserInfo.setUserId(userId);
-		checkNoDuplicateFields(newUserInfo);
 		return userDAO.save(newUserInfo);
 	}
 
@@ -155,24 +152,6 @@ public class UserService {
 		userDAO.save(user);
 		
 		return user;
-	}
-
-	//TODO: REFACTOR
-	private void checkNoDuplicateFields(User newUser) throws ResponseStatusException {
-		List<User> users = userDAO.findAll();
-		for (User user : users) {
-			if (user.equals(newUser))
-				continue;
-			if (user.getEmail().equals(newUser.getEmail()))
-				throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this email already exists");
-
-			if (user.getUsername().equals(newUser.getUsername()))
-				throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this username already exists");
-
-			if (user.getPhone().equals(newUser.getPhone()))
-				throw new ResponseStatusException(HttpStatus.CONFLICT, "A user with this phone number already exists");
-		}
-
 	}
 
 
