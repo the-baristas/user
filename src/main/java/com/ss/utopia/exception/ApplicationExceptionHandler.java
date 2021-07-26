@@ -1,8 +1,10 @@
 package com.ss.utopia.exception;
 
-import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,13 +21,15 @@ import org.springframework.web.server.ResponseStatusException;
 @ControllerAdvice
 public class ApplicationExceptionHandler {
 	
-    @ExceptionHandler(SQLException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    ResponseEntity<String> handleSqlException(SQLException exception) {
-    	exception.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(exception.getMessage());
-    }
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	ResponseEntity<Error> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
+		String message = exception.getMessage();
+		String constraintType = message.substring(
+				message.lastIndexOf("[")+1, message.indexOf("_UNIQUE"));
+		Error error = new Error(HttpStatus.CONFLICT.value(),
+				"A user with this " + constraintType + " already exists.");
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+	}
     
     @ExceptionHandler(ConfirmationExpiredException.class)
     void handleConfirmationExpiredException(ConfirmationExpiredException exception){
@@ -85,8 +89,8 @@ public class ApplicationExceptionHandler {
     
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleUncaughtException(Exception exception) {
-        System.out.printf("An unknown error occurred.", exception);
+        exception.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(exception.getMessage());
+                .body("An unknown error occurred.");
     }
 }

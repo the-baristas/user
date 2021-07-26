@@ -226,35 +226,7 @@ class UserServiceTests {
 		assertTrue(userService.registerUser(user).equals(confirmation));
 	}
 	
-	@Test
-	void testCheckNoDuplicateFields() {
-		List<User> users = new ArrayList<User>();
-		User user1 = makeUser();
-		User user2 = makeUser();
-		user2.setUserId(2);
-		user2.setEmail("bb@gmail.com");
-		user2.setUsername("username4567");
-		user2.setPhone("8195678900");
-		users.add(user1);
-		users.add(user2);
-		
-		User newUser = makeUser();
-		newUser.setUserId(3);
-		
-		when(userDao.findAll()).thenReturn(users);
-		
-		Assertions.assertThrows(ResponseStatusException.class, () -> {
-			userService.addUser(newUser);});
-		
-		newUser.setEmail("unique@unique.uni");
-		Assertions.assertThrows(ResponseStatusException.class, () -> {
-			userService.addUser(newUser);});
-		
-		newUser.setUsername("veryunique");
-		Assertions.assertThrows(ResponseStatusException.class, () -> {
-			userService.addUser(newUser);});
-		
-	}
+
 	
 	// ---- Helpers
 	

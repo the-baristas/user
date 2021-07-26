@@ -143,10 +143,10 @@ public class UserController {
 	@PutMapping("{userId}")
 	public ResponseEntity<String> updateUser(@PathVariable Integer userId, @RequestBody UserDTO userDto,
 			@RequestHeader Map<String,String> header) throws ResponseStatusException {
-		checkUsernameRequestMatchesResponse(header, userDto.getUsername());
+		User userToUpdate = userService.getUserById(userId);
+		checkUsernameRequestMatchesResponse(header, userToUpdate.getUsername());
 		
-		User user = dtoToEntity(userDto);
-		userService.updateUser(userId, user);
+		userService.updateUser(userId, dtoToEntity(userDto));
 		return new ResponseEntity<>(HttpStatus.OK);
 
 	}
