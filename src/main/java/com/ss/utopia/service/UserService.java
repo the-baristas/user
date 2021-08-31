@@ -1,7 +1,6 @@
 package com.ss.utopia.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;

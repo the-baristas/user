@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -241,22 +242,15 @@ class UserServiceTests {
 		user.setPhone("1111111111");
 		user.setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.setPassword("pass");
+		user.setDob(LocalDate.now());
+		user.setCity("city");
+		user.setStreetAddress("1111 Street St");
+		user.setZip("22111");
 		return user;
 	}
 	
 	private Optional<User> getUserOptional(){
-		Optional<User> user = Optional.ofNullable(new User());
-		user.get().setUserId(1);
-		user.get().setGivenName("First");
-		user.get().setFamilyName("Last");
-		user.get().setUsername("someusername23");
-		user.get().setEmail("username@email.org");
-		user.get().setActive(true);
-		user.get().setPhone("1111111111");
-		user.get().setRole(new UserRole(2, "ROLE_ADMIN"));
-		user.get().setPassword("pass");
-		
-		return user;
+		return Optional.ofNullable(makeUser());
 	}
 	
 	private RegistrationConfirmation makeConfirmation(User user) {
