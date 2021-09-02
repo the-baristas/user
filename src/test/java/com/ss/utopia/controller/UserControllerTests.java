@@ -347,7 +347,7 @@ class UserControllerTests {
 		when(userService.registerUser(controller.dtoToEntity(userDto))).thenReturn(confirmation);
 		
 		webTestClient.post().uri("/users/registration")
-    	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true}")
+    	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true,\"dob\":\"1990-01-01\",\"streetAddress\":\"1111 Street St\",\"city\":\"City\",\"state\":\"CA\",\"zip\":\"91303\"}")
     	.exchange().expectStatus().isCreated().expectHeader()
     	.contentType(MediaType.APPLICATION_JSON).expectBody(String.class);
 	}

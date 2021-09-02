@@ -53,11 +53,12 @@ public class UserDTO {
 	private String city;
 	
 	@NotBlank(message = "Must include a state")
-	//TODO: verify is valid two characters
+	@Pattern(regexp="^(?-i:A[LKSZRAEP]|C[AOT]|D[EC]|F[LM]|G[AU]|HI|I[ADLN]|K[SY]|LA|M[ADEHINOPST]|N[CDEHJMVY]|O[HKR]|P[ARW]|RI|S[CD]|T[NX]|UT|V[AIT]|W[AIVY])$",
+			message="Not a valid state")
 	private String state;
 	
 	@NotBlank(message = "Must include a valid zipcode")
-	@Pattern(regexp="^\\d{5}(-\\d{4})?$")
+	@Pattern(regexp="^\\d{5}(-\\d{4})?$", message="Not a valid ZIP code")
 	private String zip;
 	
 	public int getUserId() {
