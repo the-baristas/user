@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,10 +15,15 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.ss.utopia.exception.ExceptionHandlerFilter;
 import com.ss.utopia.login.UtopiaUserDetailsService;
 import com.ss.utopia.login.jwt.JwtTokenVerifier;
 import com.ss.utopia.login.jwt.JwtUserAuthenticationFilter;
+
+import io.jsonwebtoken.ExpiredJwtException;
 
 @EnableWebSecurity
 @Configuration
@@ -42,6 +49,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .and()
 		.addFilter(new JwtUserAuthenticationFilter(authenticationManager(), jwtSecretKey))
 		.addFilterAfter(new JwtTokenVerifier(jwtSecretKey), JwtUserAuthenticationFilter.class)
+		.addFilterBefore(new ExceptionHandlerFilter(), JwtUserAuthenticationFilter.class)
 		.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/users").permitAll()
 		.antMatchers(HttpMethod.POST, "/users/registration").permitAll()

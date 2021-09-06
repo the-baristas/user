@@ -1,7 +1,5 @@
 package com.ss.utopia.exception;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,6 +40,8 @@ public class ApplicationExceptionHandler {
             ResponseStatusException exception) {
         throw exception;
     }
+    
+
     
     @ExceptionHandler(AuthenticationException.class)
     ResponseEntity<String> handleAuthenticationException(
