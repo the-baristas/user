@@ -23,26 +23,36 @@ public class UserService {
 
 	@Autowired
 	private UserDAO userDAO;
-	
+
 	@Autowired
 	private RegistrationConfirmationDAO confirmationDAO;
-	
+
 	@Autowired
 	private EmailSender emailSender;
-	
+
 	private Integer confirmationExpirationMinutes = 15;
 
 	public User getUserById(Integer userId) throws ResponseStatusException {
 		return userDAO.findById(userId).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id: " + userId));
 	}
-	
-	public Page<User> getAllUsers(Integer page, Integer size){
+
+	public Page<User> getAllUsers(Integer page, Integer size) {
 		return userDAO.findAll(PageRequest.of(page, size));
 	}
-	
-	public Page<User> findAllUserBySearchTerm(String searchTerm, Integer page, Integer size){
+
+	public Page<User> getAllUsersFilterByActive(Integer page, Integer size, Boolean active) {
+		return userDAO.findAllActive(true, PageRequest.of(page, size));
+	}
+
+	public Page<User> findAllUserBySearchTerm(String searchTerm, Integer page, Integer size) {
 		return userDAO.findDistinctBySearchTerm(searchTerm, PageRequest.of(page, size));
+	}
+
+	public Page<User> findAllUserBySearchTermFilterByActive(String searchTerm, Integer page, Integer size,
+			Boolean active) {
+		return userDAO.findDistinctBySearchTerm(searchTerm, active, PageRequest.of(page, size));
+
 	}
 
 	public User getUserByEmail(String email) throws ResponseStatusException {
@@ -62,7 +72,7 @@ public class UserService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with username: " + username);
 		}
 	}
-	
+
 	public User getUserByPhoneNumber(String phone) {
 		try {
 			return userDAO.findByPhoneNumber(phone).get(0);
@@ -86,12 +96,12 @@ public class UserService {
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 
 		Utils.checkEmailValid(newUserInfo.getEmail());
-		
+
 		if (newUserInfo.getPassword() != null)
 			newUserInfo.setPassword(Utils.passwordEncoder().encode(newUserInfo.getPassword()));
 		else
 			newUserInfo.setPassword(oldUserInfo.getPassword());
-		
+
 		newUserInfo.setUserId(userId);
 		return userDAO.save(newUserInfo);
 	}
@@ -101,57 +111,47 @@ public class UserService {
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find user with id = " + userId));
 		userDAO.deleteById(deleted.getUserId());
 	}
-	
+
 	@Transactional
 	public RegistrationConfirmation registerUser(User user) throws ResponseStatusException {
-		
-		RegistrationConfirmation confirmation = new RegistrationConfirmation(
-		UUID.randomUUID().toString(),
-		LocalDateTime.now(),
-		LocalDateTime.now().plusMinutes(confirmationExpirationMinutes),
-		user
-		);	
-		
+
+		RegistrationConfirmation confirmation = new RegistrationConfirmation(UUID.randomUUID().toString(),
+				LocalDateTime.now(), LocalDateTime.now().plusMinutes(confirmationExpirationMinutes), user);
+
 		user.setActive(false);
 		addUser(user);
-		
+
 		RegistrationConfirmation saved = confirmationDAO.save(confirmation);
-		
+
 		emailSender.sendConfirmationEmail(user, saved);
-		
+
 		return saved;
 	}
-	
 
-	public User confirmRegistration(RegistrationConfirmation confirmation ) {
+	public User confirmRegistration(RegistrationConfirmation confirmation) {
 		User user = confirmation.getUser();
-		
+
 		LocalDateTime currentTime = LocalDateTime.now();
-		
-		//Resend email if previous email has expired
-		if(currentTime.isAfter(confirmation.getExpiresAt())) {
-			
-			RegistrationConfirmation confirmationRetry = new RegistrationConfirmation(
-					UUID.randomUUID().toString(),
-					LocalDateTime.now(),
-					LocalDateTime.now().plusMinutes(confirmationExpirationMinutes),
-					user
-					);	
-					
-					RegistrationConfirmation saved = confirmationDAO.save(confirmationRetry);
-					emailSender.sendConfirmationEmail(user, saved);
-				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-						"This confirmation code has expired. Another email will be sent to " + user.getEmail());
+
+		// Resend email if previous email has expired
+		if (currentTime.isAfter(confirmation.getExpiresAt())) {
+
+			RegistrationConfirmation confirmationRetry = new RegistrationConfirmation(UUID.randomUUID().toString(),
+					LocalDateTime.now(), LocalDateTime.now().plusMinutes(confirmationExpirationMinutes), user);
+
+			RegistrationConfirmation saved = confirmationDAO.save(confirmationRetry);
+			emailSender.sendConfirmationEmail(user, saved);
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+					"This confirmation code has expired. Another email will be sent to " + user.getEmail());
 		}
-		
+
 		confirmation.setConfirmedAt(currentTime);
 		confirmationDAO.save(confirmation);
-		
+
 		user.setActive(true);
 		userDAO.save(user);
-		
+
 		return user;
 	}
-
 
 }
