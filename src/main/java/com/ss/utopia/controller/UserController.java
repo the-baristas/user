@@ -172,7 +172,7 @@ public class UserController {
 	}
 	
 	@PostMapping("registration")
-	public ResponseEntity<Map<String,String>> registerUser(@RequestBody UserDTO userDto){
+	public ResponseEntity<Map<String,String>> registerUser(@Valid @RequestBody UserDTO userDto){
 		
 		RegistrationConfirmation confirmation = userService.registerUser(dtoToEntity(userDto));
 		

@@ -38,7 +38,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ss.utopia.dto.UserDTO;
 import com.ss.utopia.entity.RegistrationConfirmation;
 import com.ss.utopia.entity.User;
@@ -266,7 +265,7 @@ class UserControllerTests {
 		when(userService.addUser(controller.dtoToEntity(userDto))).thenReturn(user);
 		
 	    webTestClient.post().uri("/users")
-        	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true}")
+        	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true,\"dob\":\"1990-01-01\",\"streetAddress\":\"1111 Street St\",\"city\":\"City\",\"state\":\"CA\",\"zip\":\"91303\"}")
         	.exchange().expectStatus().isCreated().expectHeader()
         	.contentType(MediaType.APPLICATION_JSON);
 	}
@@ -282,9 +281,9 @@ class UserControllerTests {
 		when(userService.getUserById(userDto.getUserId())).thenReturn(user);
 
 		when(userService.updateUser(userDto.getUserId(), controller.dtoToEntity(userDto))).thenReturn(user);
+		
 		mockMvc.perform(put("/users/{userId}", userDto.getUserId(), userDto).header("authorization", adminToken).contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(userDto))).andExpect(status().isOk());
-
+				.content("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true,\"dob\":\"1990-01-01\",\"streetAddress\":\"1111 Street St\",\"city\":\"City\",\"state\":\"CA\",\"zip\":\"91303\"}").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
 
 	@Test
@@ -348,7 +347,7 @@ class UserControllerTests {
 		when(userService.registerUser(controller.dtoToEntity(userDto))).thenReturn(confirmation);
 		
 		webTestClient.post().uri("/users/registration")
-    	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true}")
+    	.contentType(MediaType.APPLICATION_JSON).bodyValue("{\"userId\":1,\"givenName\":\"First\",\"familyName\":\"Last\",\"password\":\"password\",\"username\":\"someUsername23\",\"email\":\"username@email.org\",\"phone\":\"1111111111\",\"role\":\"ROLE_ADMIN\",\"active\":true,\"dob\":\"1990-01-01\",\"streetAddress\":\"1111 Street St\",\"city\":\"City\",\"state\":\"CA\",\"zip\":\"91303\"}")
     	.exchange().expectStatus().isCreated().expectHeader()
     	.contentType(MediaType.APPLICATION_JSON).expectBody(String.class);
 	}
@@ -389,6 +388,10 @@ class UserControllerTests {
 		user.setPhone("1111111111");
 		user.setRole(new UserRole(2, "ROLE_ADMIN"));
 		user.setPassword("pass");
+		user.setDob(LocalDate.now());
+		user.setCity("city");
+		user.setStreetAddress("1111 Street St");
+		user.setZip("22111");
 		return user;
 	}
 	

@@ -1,5 +1,7 @@
 package com.ss.utopia.entity;
 
+import java.time.LocalDate;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -42,6 +44,21 @@ public class User {
 	
 	@Column(name = "phone", unique = true)
 	private String phone;
+	
+	@Column(name = "dob")
+	private LocalDate dob;
+	
+	@Column(name = "street_address")
+	private String streetAddress;
+	
+	@Column(name = "city")
+	private String city;
+	
+	@Column(name = "state")
+	private String state;
+	
+	@Column(name = "zip")
+	private String zip;
 	
 	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "role", referencedColumnName = "id", insertable = false, updatable = true)
@@ -120,6 +137,46 @@ public class User {
 
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
+	}
+
+	public LocalDate getDob() {
+		return dob;
+	}
+
+	public String getStreetAddress() {
+		return streetAddress;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public String getZip() {
+		return zip;
+	}
+
+	public void setDob(LocalDate dob) {
+		this.dob = dob;
+	}
+
+	public void setStreetAddress(String streetAddress) {
+		this.streetAddress = streetAddress;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public void setZip(String zip) {
+		this.zip = zip;
 	}
 
 	@Override

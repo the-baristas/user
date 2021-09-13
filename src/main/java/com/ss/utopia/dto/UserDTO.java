@@ -1,8 +1,10 @@
 package com.ss.utopia.dto;
 
+import java.time.LocalDate;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -40,6 +42,24 @@ public class UserDTO {
 	private String role;
 	
 	private boolean isActive;
+	
+	@NotNull(message = "Must include a date of birth (dob)")
+	private LocalDate dob;
+	
+	@NotBlank(message = "Must include a street address")
+	private String streetAddress;
+	
+	@NotBlank(message = "Must include a city")
+	private String city;
+	
+	@NotBlank(message = "Must include a state")
+	@Pattern(regexp="^(?-i:A[LKSZRAEP]|C[AOT]|D[EC]|F[LM]|G[AU]|HI|I[ADLN]|K[SY]|LA|M[ADEHINOPST]|N[CDEHJMVY]|O[HKR]|P[ARW]|RI|S[CD]|T[NX]|UT|V[AIT]|W[AIVY])$",
+			message="Not a valid state")
+	private String state;
+	
+	@NotBlank(message = "Must include a valid zipcode")
+	@Pattern(regexp="^\\d{5}(-\\d{4})?$", message="Not a valid ZIP code")
+	private String zip;
 	
 	public int getUserId() {
 		return userId;
@@ -96,4 +116,35 @@ public class UserDTO {
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
+	public LocalDate getDob() {
+		return dob;
+	}
+	public String getStreetAddress() {
+		return streetAddress;
+	}
+	public String getCity() {
+		return city;
+	}
+	public String getState() {
+		return state;
+	}
+	public String getZip() {
+		return zip;
+	}
+	public void setDob(LocalDate dob) {
+		this.dob = dob;
+	}
+	public void setStreetAddress(String streetAddress) {
+		this.streetAddress = streetAddress;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public void setState(String state) {
+		this.state = state;
+	}
+	public void setZip(String zip) {
+		this.zip = zip;
+	}
+	
 }
