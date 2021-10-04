@@ -32,10 +32,7 @@ public interface UserDAO extends JpaRepository<User, Integer>{
     @Query("SELECT u FROM User u WHERE u.username LIKE %:searchTerm% OR u.email LIKE %:searchTerm% OR u.givenName LIKE %:searchTerm% OR u.familyName LIKE %:searchTerm% OR u.phone LIKE %:searchTerm%")
     Page<User> findDistinctBySearchTerm(
             @Param("searchTerm") String searchTerm, Pageable pageable);
-    
-//	@Query("SELECT u FROM User u WHERE u.isActive = ?1 AND (u.username LIKE %?2% OR u.email LIKE %?2%)")
-//	Page<User> findDistinctBySearchTerm(Boolean active, String searchTerm, Pageable pageable);
-    
+        
     @Query("SELECT u FROM User u WHERE u.isActive = ?2 AND (u.username LIKE %?1% OR u.email LIKE %?1% OR u.givenName LIKE %?1% OR u.familyName LIKE %?1% OR u.phone LIKE %?1%)")
     Page<User> findDistinctBySearchTerm(
             String searchTerm, Boolean active, Pageable pageable);
