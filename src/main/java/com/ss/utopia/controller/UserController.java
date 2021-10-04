@@ -101,7 +101,7 @@ public class UserController {
 		
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER', 'ROLE_AGENT')")
 	@GetMapping("{userId}")
 	public UserDTO getUserById(@PathVariable("userId") Integer userId, @RequestHeader Map<String, String> header)
 			throws ResponseStatusException {
@@ -111,7 +111,7 @@ public class UserController {
 		return userDto;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER', 'ROLE_AGENT')")
 	@GetMapping("email/{email}")
 	public UserDTO getUserByEmail(@PathVariable("email") String email, @RequestHeader Map<String, String> header)
 			throws ResponseStatusException {
@@ -122,7 +122,7 @@ public class UserController {
 
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER', 'ROLE_AGENT')")
 	@GetMapping("username/{username}")
 	public UserDTO getUserByUsername(@PathVariable("username") String username,
 			@RequestHeader Map<String, String> header) throws ResponseStatusException {
@@ -131,7 +131,7 @@ public class UserController {
 		return userDto;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER', 'ROLE_AGENT')")
 	@GetMapping("phone/{phone}")
 	public UserDTO getUserByPhoneNumber(@PathVariable("phone") String phone,
 			@RequestHeader Map<String, String> header) {
@@ -162,7 +162,7 @@ public class UserController {
 
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER', 'ROLE_AGENT')")
 	@DeleteMapping("{userId}")
 	public ResponseEntity<String> deleteUser(@PathVariable Integer userId, @RequestHeader Map<String, String> header)
 			throws ResponseStatusException {
@@ -172,7 +172,7 @@ public class UserController {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER', 'ROLE_AGENT')")
 	@DeleteMapping("username/{username}")
 	public ResponseEntity<String> deleteUserByUsername(@PathVariable String username,
 			@RequestHeader Map<String, String> header) throws ResponseStatusException {
