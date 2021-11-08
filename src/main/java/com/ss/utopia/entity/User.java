@@ -61,7 +61,7 @@ public class User {
 	private String zip;
 	
 	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "role", referencedColumnName = "id", insertable = false, updatable = true)
+	@JoinColumn(name = "role", referencedColumnName = "id", updatable = true)
 	private UserRole role;
 	
 	@Column(name = "is_active")
